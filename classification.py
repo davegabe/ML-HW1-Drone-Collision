@@ -12,6 +12,7 @@
 # 6. UAV_i_target_y: y coordinate of the ith UAV target in meters
 import numpy as np
 import pandas as pd
+from scipy import sparse
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, accuracy_score
@@ -21,10 +22,9 @@ from imblearn.over_sampling import SMOTE, RandomOverSampler
 from typing import Literal
 
 seed = 1
-time_step = 0.01
 test_size = 0.25
 Approaches = Literal['NONE', 'SMOTE', 'RANDOM_OVER_SAMPLING', 'SMOTE+RANDOM_OVER_SAMPLING', 'CUSTOM']
-oversampling_approach: Approaches = "NONE"
+oversampling_approach: Approaches = "CUSTOM"
 usingAngles = False
 
 # # DataField is a class that represents a field in the dataset
@@ -36,56 +36,7 @@ usingAngles = False
 #     'UAV_5_track', 'UAV_5_x', 'UAV_5_y', 'UAV_5_vx', 'UAV_5_vy', 'UAV_5_target_x', 'UAV_5_target_y',
 # ]
 
-def create_paths_from_dataset(X: np.ndarray) -> np.ndarray:
-    """
-    Create paths from the dataset.
-    
-    Args:
-        X: dataset
-    
-    Returns:
-        paths: paths
-    """
-    # Each row of the dataset represents the state of the UAVs at a given time
-    # Having their position, velocity and the angle between the UAV and its target
-    # We can use this information to predict the number of collision between the UAVs
-    # We create for each drone a list of position in the form (x, y)
-
-    # Create paths for each drone of each row of the dataset
-    paths: list[list[list[tuple[float, float]]]] = [[[] for _ in range(5)] for _ in range(len(X))]
-    # print(np.cos(np.pi/2-np.pi/2))
-    # return
-    # For each row of the dataset
-    for row in range(1):
-        # For each drone
-        for drone in range(5):
-            print("Drone: ", drone)
-            # Get the clockwise angle from north between the ith UAV and its target (0, 2*pi)
-            angle = X[row, drone * 7]
-            # Get the position of the drone
-            x = X[row, drone * 7 + 1]
-            y = X[row, drone * 7 + 2]
-            # Get the velocity of the drone
-            vx = X[row, drone * 7 + 3]
-            vy = X[row, drone * 7 + 4]
-            # Get the target of the drone
-            target_x = X[row, drone * 7 + 5]
-            target_y = X[row, drone * 7 + 6]
-            time = 0
-            paths[row][drone].append((x, y))
-            # Compute tha paths, since we normalize the dataset, we have domain of x and y in [0, 1]
-            while 1>=x>=0 and 1>=y>=0:
-                # Compute the new position of the drone
-                x += vx * np.cos(angle) * time_step
-                y += vy * np.sin(angle) * time_step
-                # Add the new position to the path of the drone
-                paths[row][drone].append((x, y))
-                time += time_step
-            # print(paths[row][drone])
-            # print("Target: ", (target_x, target_y))
-    return paths
-
-def normalize_data(X: np.ndarray) -> np.ndarray:
+def normalize_data(X: pd.Series) -> pd.Series:
     """
     Normalize the data.
 
@@ -128,7 +79,7 @@ def normalize_data(X: np.ndarray) -> np.ndarray:
             X[f"UAV_{j}_target_y"] = (X[f"UAV_{j}_target_y"] - min_y) / (max_y - min_y)
     return X
 
-def custom_oversampling(X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def custom_oversampling(X: pd.Series, y: pd.Series) -> tuple[pd.Series, pd.Series]:
     """
     Custom oversampling.
     
@@ -140,6 +91,8 @@ def custom_oversampling(X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.nd
         X: oversampled dataset
         y: oversampled labels
     """
+    X_resampled = [X.copy()]
+    y_resampled = [y.copy()]
     # Find the number of samples in the majority class
     majority_class = np.argmax(np.bincount(y))
     majority_class_count = np.bincount(y)[majority_class]
@@ -152,7 +105,38 @@ def custom_oversampling(X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.nd
             number_of_samples_to_create = majority_class_count - current_class_count
             # Create synthetic samples using create_paths_from_dataset
             for j in range(number_of_samples_to_create):
-                pass
+                # Take a random sample from the current class
+                rnd = np.random.randint(0, current_class_count)
+                sample = X[y == i].iloc[rnd].copy(deep = True)
+                # For each drone in the sample
+                for k in range(1, 6):
+                    # Take all the features of the drone
+                    drone_x = sample[f"UAV_{k}_x"]
+                    drone_y = sample[f"UAV_{k}_y"]
+                    vx = sample[f"UAV_{k}_vx"]
+                    vy = sample[f"UAV_{k}_vy"]
+                    target_x = sample[f"UAV_{k}_target_x"]
+                    target_y = sample[f"UAV_{k}_target_y"]
+                    # Calculate the angle between the drone and its target
+                    angle = np.arctan2(target_y - drone_y, target_x - drone_x)
+                    # Randomly choose a time step
+                    time_step = np.random.uniform(0.1, 10)
+                    # Move the drone backwards
+                    drone_x -= vx * np.cos(angle) * time_step
+                    drone_y -= vy * np.sin(angle) * time_step
+                    # Update the features of the drone
+                    sample[f"UAV_{k}_x"] = drone_x
+                    sample[f"UAV_{k}_y"] = drone_y
+                # Add the sample to the dataset
+                X_resampled.append(sample)
+                y_resampled.append(i)
+    # Return the oversampled dataset
+    if sparse.issparse(X):
+        X_resampled = sparse.vstack(X_resampled, format=X.format)
+    else:
+        X_resampled = np.vstack(X_resampled)
+    y_resampled = np.hstack(y_resampled)
+    return X, y
 
 def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -165,18 +149,15 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         y_test: test labels
     """
     # Load the dataset
+    print(" - Loading the dataset...")
     dataset = pd.read_csv('train_set.tsv', sep='\t', header=0)
+
     # Split the dataset into features and labels
     X = dataset.iloc[:, :-2]
     y = dataset.iloc[:, -2]
-    if not usingAngles:
-        # We want to remove UAV_i_track
-        X = X.drop(columns=[f"UAV_{i}_track" for i in range(1, 6)])
-        
-    # Normalize the features
-    X = normalize_data(X)
 
     # Since the dataset is unbalanced, we have to balance it
+    print(f" - Balancing the dataset ({oversampling_approach})...")
     if oversampling_approach == "SMOTE":
         smote = SMOTE(random_state=seed, k_neighbors=2)
         X, y = smote.fit_resample(X, y)
@@ -185,8 +166,19 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         X, y = ros.fit_resample(X, y)
     elif oversampling_approach == "CUSTOM":
         X, y = custom_oversampling(X, y)
+        
+    # Remove the columns "UAV_i_track" if not using angles
+    if not usingAngles:
+        # We want to remove UAV_i_track
+        print(" - Removing the columns 'UAV_i_track'...")
+        X = X.drop(columns=[f"UAV_{i}_track" for i in range(1, 6)])
+        
+    # Normalize the features
+    print(" - Normalizing the features...")
+    X = normalize_data(X)
 
     # Split the dataset into training and test set
+    print(f" - Splitting the dataset into training ({100-test_size*100}%) and test set ({test_size*100}%)...")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
     return X_train, X_test, y_train, y_test
 
@@ -200,8 +192,9 @@ def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nda
         y_train: training labels
         y_test: test labels
     """
+    print(" - Training a logistic regression model...")
     # Use sklearn to train a logistic regression model
-    classifier = LogisticRegression(random_state=seed, max_iter=100000)
+    classifier = LogisticRegression(random_state=seed, max_iter=10000)
     classifier.fit(X_train, y_train)
     # Evaluate the model
     y_pred = classifier.predict(X_test)
@@ -223,9 +216,10 @@ def main():
     """
     Classification problem: estimate the total number conflicts between UAVs given the provided features.
     """
+    # Set the seed
+    np.random.seed(seed)
     # Load the dataset
     X_train, X_test, y_train, y_test = load_dataset()
-    # print(X_train[0])
 
     # Train the model using 4 different classifiers
     # 1. Logistic Regression
