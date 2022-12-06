@@ -19,6 +19,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from imblearn.over_sampling import SMOTE, RandomOverSampler
+from sklearn.naive_bayes import GaussianNB
 from utils import Approaches, custom_oversampling, normalize_data
 
 
@@ -102,6 +103,36 @@ def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nda
     print('Standard Deviation')
     print(scores.std())
 
+def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> None:
+    """
+    Train a Gaussian Naive Bayes model and evaluate it.
+    
+    Args:
+        X_train: training set
+        X_test: test set
+        y_train: training labels
+        y_test: test labels
+    """
+    print(" - Training a Gaussian Naive Bayes model...")
+    # Use sklearn to train a Gaussian Naive Bayes model
+    classifier = GaussianNB()
+    classifier.fit(X_train, y_train)
+    # Evaluate the model
+    y_pred = classifier.predict(X_test)
+    print('Gaussian Naive Bayes')
+    print('Confusion Matrix')
+    print(confusion_matrix(y_test, y_pred))
+    print('Accuracy')
+    print(accuracy_score(y_test, y_pred))
+    print('Cross Validation')
+    kfold = KFold(n_splits=10, random_state=seed, shuffle=True)
+    scores = cross_val_score(classifier, X_train, y_train, cv=kfold)
+    print(scores)
+    print('Mean Accuracy')
+    print(scores.mean())
+    print('Standard Deviation')
+    print(scores.std())
+
 def main():
     """
     Classification problem: estimate the total number conflicts between UAVs given the provided features.
@@ -114,9 +145,9 @@ def main():
     # Train the model using 4 different classifiers
     # 1. Logistic Regression
     logistic_regression(X_train, X_test, y_train, y_test)
-    # 2. K-Nearest Neighbors
-    # 3. Support Vector Machine
-    # 4. Decision Tree
+    # 2. Gaussian Naive Bayes
+    gaussian_naive_bayes(X_train, X_test, y_train, y_test)
+
 
 if __name__ == '__main__':
     main()
