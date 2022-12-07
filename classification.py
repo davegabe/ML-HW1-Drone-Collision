@@ -46,18 +46,6 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # Split the dataset into features and labels
     X = dataset.iloc[:, :-2]
     y = dataset.iloc[:, -2]
-
-    # Since the dataset is unbalanced, we have to balance it
-    print(f" - Balancing the dataset ({oversampling_approach})...")
-    if oversampling_approach == "SMOTE":
-        smote = SMOTE(random_state=seed, k_neighbors=2)
-        X, y = smote.fit_resample(X, y)
-    elif oversampling_approach == "RANDOM_OVER_SAMPLING":
-        ros = RandomOverSampler(random_state=seed)
-        X, y = ros.fit_resample(X, y)
-    elif oversampling_approach == "CUSTOM":
-        X, y = custom_oversampling(X, y)
-        
     # Remove the columns "UAV_i_track" if not using angles
     if not usingAngles:
         # We want to remove UAV_i_track
@@ -71,6 +59,19 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # Split the dataset into training and test set
     print(f" - Splitting the dataset into training ({100-test_size*100}%) and test set ({test_size*100}%)...")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
+
+    # Since the dataset is unbalanced, we need to oversample the minority classes
+    print(f" - Oversampling the minority classes using '{oversampling_approach}' approach...")
+    if oversampling_approach == "SMOTE":
+        # Use SMOTE to oversample the minority classes
+        X_train, y_train = SMOTE().fit_resample(X_train, y_train)
+    elif oversampling_approach == "RANDOM":
+        # Use random oversampling to oversample the minority classes
+        X_train, y_train = RandomOverSampler().fit_resample(X_train, y_train)
+    elif oversampling_approach == "CUSTOM":
+        # Use custom oversampling to oversample the minority classes
+        X_train, y_train = custom_oversampling(X_train, y_train)
+
     return X_train, X_test, y_train, y_test
 
 def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> None:
