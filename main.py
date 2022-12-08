@@ -1,7 +1,6 @@
-# Launch classification model on different seeds
 from matplotlib import pyplot as plt
 import numpy as np
-from classification_no_angles import main as main_no_angles
+from classification import main as main_no_angles
 from multiprocessing import Pool
 import builtins
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score, recall_score
@@ -9,16 +8,17 @@ import seaborn as sns
 
 def main():
     """
-    Launch classification model on different seeds.
+    Launch classification model on different seeds and plot the results.
     """
     # List of predictions for each seed, each prediction is a dictionary with the name of the classifier as key and (y_test, y_pred) as value
     predicts: list[dict[str, tuple[np.ndarray, np.ndarray]]] = []
 
-    n_processes = 4
+    n_processes = 10
+    use_angle = False
 
     # Launch the classification model on different seeds
     with Pool(n_processes, initializer=mute) as p:
-        predicts = p.starmap(main_no_angles, [(seed,) for seed in range(n_processes)])
+        predicts = p.starmap(main_no_angles, [(seed,use_angle) for seed in range(n_processes)])
 
     # For each classifier, compute the average accuracy, precision, recall and f1-score
     for classifier in predicts[0].keys():
@@ -43,8 +43,8 @@ def main():
 
         # Find the best seed
         best_seed = np.argmax(f1)
-        print(f"\tBest seed: {best_seed}")
         y_test, y_pred = predicts[best_seed][classifier]
+        # print(f"\tBest seed: {best_seed}")
 
         # Plot the confusion matrix for the best seed using seaborn
         sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, cmap="Blues")

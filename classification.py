@@ -16,7 +16,7 @@ oversampling_approach: Approaches = "NONE"
 pre_over_sampling_approach: Approaches = "CUSTOM"
 
 
-def load_dataset(seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Load the dataset from the file.
     
@@ -30,7 +30,10 @@ def load_dataset(seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndar
     dataset = pd.read_csv(file, sep='\t', header=0)
 
     # Split the dataset into features and labels (without UAV_i_track)
-    X = dataset.iloc[:, 1:-2]
+    if use_angle:
+        X = dataset.iloc[:, :-2]
+    else:
+        X = dataset.iloc[:, 1:-2]
     y = dataset.iloc[:, -2]
         
     # Normalize the features
@@ -129,14 +132,14 @@ def svm(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np
     y_pred = classifier.predict(X_test)
     return y_test, y_pred
 
-def main(seed: int) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """
     Classification problem: estimate the total number conflicts between UAVs given the provided features.
     """
     # Set the seed
     np.random.seed(seed)
     # Load the dataset
-    X_train, X_test, y_train, y_test = load_dataset(seed)
+    X_train, X_test, y_train, y_test = load_dataset(seed, use_angle)
 
     predict = dict()
     # Train the model using 4 different classifiers for imbalanced data
