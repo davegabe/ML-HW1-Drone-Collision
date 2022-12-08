@@ -2,7 +2,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from classification_no_angles import main as main_no_angles
-from classification import main as main_angles
 from multiprocessing import Pool
 import builtins
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score, recall_score
