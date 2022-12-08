@@ -1,0 +1,40 @@
+\usepackage[top=4cm, bottom=3cm, outer=3cm, inner=3cm, heightrounded, marginparwidth=3.5cm, marginparsep=0.5cm, headheight=2cm]{geometry}
+%\usepackage[a4paper]{geometry}
+
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage[export]{adjustbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[labelfont=bf,justification=centering,margin=0.5cm]{caption}
+
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
+\titleformat*{\paragraph}{\large\bfseries}
+\titleformat*{\subparagraph}{\large\bfseries}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+
+
+\fancyhead[R]{%
+  {%
+    \hspace{-2cm}
+    \includegraphics[width=5cm]{Figures/logoSapienza.png} 
+     \hfill 
+    \parbox[b]{5cm}{\centering }
+   %
+  }{}%
+}
+\fancypagestyle{plain}{} 
+
+
+
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\linespread{1.25}

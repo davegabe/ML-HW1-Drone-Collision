@@ -1,0 +1,65 @@
+\section{Introduction}
+In this report we will discuss the design and implementation for the given two tasks about classification and regression about collisions of drones ina  2D environment.
+
+\subsection{Dataset}
+The dataset we will use is the one provided by the course. It contains 1000 samples of drone collisions in a 2D environment. The dataset contains the following features:
+\begin{itemize}
+    \item \textbf{For 5 UAVs} (where i is the UAV number)):
+    \begin{itemize}
+        \item \textbf{UAV\_i\_track}: clockwise angle from north between the ith UAV and its target (0, 2*pi)
+        \item \textbf{UAV\_i\_x}: x coordinate of the ith UAV in meters
+        \item \textbf{UAV\_i\_y}: y coordinate of the ith UAV in meters
+        \item \textbf{UAV\_i\_vx}: x velocity of the ith UAV in m/s
+        \item \textbf{UAV\_i\_vy}: y velocity of the ith UAV in m/s
+        \item \textbf{UAV\_i\_target\_x}: x coordinate of the ith UAV target in meters
+        \item \textbf{UAV\_i\_target\_y}: y coordinate of the ith UAV target in meters
+    \end{itemize}
+    \item \textbf{num\_collisions}: number of collisions in the sample
+    \item \textbf{min\_CPA}: minimum CPA in the sample (An estimated point in which the distance between two objects, of which at least one is in motion, will reach its minimum value)
+\end{itemize}
+The dataset is unbalanced, as it contains 1000 samples divided into 5 classes (0, 1, 2, 3, 4) that represent the number of collisions in the sample, as shown in (Fig. \ref{fig:dataset_distribution}).
+This is also due to the fact that the distribution of the number of collisions is not uniform.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{../results/distribution.png}
+    \caption{The dataset is composed of 1000 samples divided into 5 classes that represent the number of collisions.}
+    \label{fig:dataset_distribution}
+\end{figure}
+
+
+\subsection{Classification}
+The classification task is to predict the number of collisions in a sample. We will use several classification algorithms to compare their performance. The algorithms we will use are:
+\begin{itemize}
+    \item \textbf{Logistic Regression}
+    \item \textbf{Decision Tree}
+    \item \textbf{Random Forest}
+    \item \textbf{Support Vector Machine}
+    \item \textbf{K-Nearest Neighbors}
+\end{itemize}
+Since the dataset is unbalanced, we expect better results from Random Forest and Support Vector Machine, as they are able to handle unbalanced datasets.
+We will use the following metrics to evaluate the performance of the algorithms:
+\begin{itemize}
+    \item \textbf{Accuracy}: the number of correct predictions divided by the total number of predictions
+    \item \textbf{Precision}: the number of true positives divided by the number of true positives plus the number of false positives
+    \item \textbf{Recall}: the number of true positives divided by the number of true positives plus the number of false negatives
+    \item \textbf{F1-Score}: the harmonic mean of precision and recall
+\end{itemize}
+Since the dataset is unbalanced, we will use the F1-Score as the main metric to evaluate the performance of the algorithms. We will also use the confusion matrix to visualize the performance of the algorithms.
+
+\subsection{Regression}
+The regression task is to predict the minimum CPA in a sample. We will use several regression algorithms to compare their performance. The algorithms we will use are:
+\begin{itemize}
+    \item \textbf{Linear Regression}
+    \item \textbf{Decision Tree}
+    \item \textbf{Random Forest}
+    \item \textbf{Support Vector Machine}
+    \item \textbf{K-Nearest Neighbors}
+\end{itemize}
+We will use the following metrics to evaluate the performance of the algorithms:
+\begin{itemize}
+    \item \textbf{Mean Absolute Error}: the average of the absolute differences between the predictions and the actual values
+    \item \textbf{Mean Squared Error}: the average of the squared differences between the predictions and the actual values
+    \item \textbf{Root Mean Squared Error}: the square root of the mean squared error
+\end{itemize}
+We will use the Root Mean Squared Error as the main metric to evaluate the performance of the algorithms.
