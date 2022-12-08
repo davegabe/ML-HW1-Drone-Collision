@@ -28,6 +28,7 @@ test_size = 0.2
 oversampling_approach: Approaches = "SMOTETomek"
 pre_over_sampling_approach: Approaches = "CUSTOM"
 
+
 def load_dataset(seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Load the dataset from the file.
@@ -121,7 +122,7 @@ def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nd
     print(accuracy_score(y_test, y_pred))
     print('Cross Validation')
 
-def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> None:
+def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a random forest model and evaluate it.
     
@@ -135,20 +136,14 @@ def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, 
     # Use sklearn to train a random forest model
     classifier = RandomForestClassifier(n_estimators=50, random_state=seed)
     classifier.fit(X_train, y_train)
+    # confusion matrix
+    y_pred = classifier.predict(X_test)
     # Evaluate the model
     y_pred = classifier.predict(X_test)
-    print('Random Forest')
-    print('Confusion Matrix')
-    print(confusion_matrix(y_test, y_pred))
-    print('Accuracy')
-    print(accuracy_score(y_test, y_pred))
-    # F1 score
-    print('F1 score')
-    f1 = f1_score(y_test, y_pred, average='weighted')
-    print(f1)
-    return f1, (y_test, y_pred)
 
-def main(seed: int) -> tuple[dict, dict]:
+    return y_test, y_pred
+
+def main(seed: int) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """
     Classification problem: estimate the total number conflicts between UAVs given the provided features.
     """
@@ -157,11 +152,10 @@ def main(seed: int) -> tuple[dict, dict]:
     # Load the dataset
     X_train, X_test, y_train, y_test = load_dataset(seed)
 
-    scores = dict()
     predict = dict()
     # Train the model using 4 different classifiers for imbalanced data
     # 1. Random Forest
-    scores["Random Forest"], predict["Random Forest"] = random_forest(X_train, X_test, y_train, y_test, seed)
+    predict["Random Forest"] = random_forest(X_train, X_test, y_train, y_test, seed)
     # 2. SVM
     # svm(X_train, X_test, y_train, y_test, seed)
     # 3. Logistic Regression
@@ -169,7 +163,7 @@ def main(seed: int) -> tuple[dict, dict]:
     # 4. Gaussian Naive Bayes
     # gaussian_naive_bayes(X_train, X_test, y_train, y_test, seed)
 
-    return scores, predict
+    return predict
 
 
 if __name__ == '__main__':
