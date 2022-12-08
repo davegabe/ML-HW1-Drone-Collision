@@ -52,6 +52,10 @@ def normalize_data(X: pd.Series) -> pd.Series:
             X[f"UAV_{j}_target_y"][row] = (X[f"UAV_{j}_target_y"][row] - min_y) / (max_y - min_y)
             X[f"UAV_{j}_vx"][row] = X[f"UAV_{j}_vx"][row] / (max_x - min_x)
             X[f"UAV_{j}_vy"][row] = X[f"UAV_{j}_vy"][row] / (max_y - min_y)
+
+        # If has "min_CPA" column, we normalize it
+        if "min_CPA" in X.columns:
+            X["min_CPA"][row] = X["min_CPA"][row] / (max_x - min_x)
     return X
 
 def normalize_data_rect(X: pd.Series) -> pd.Series:
@@ -94,6 +98,10 @@ def normalize_data_rect(X: pd.Series) -> pd.Series:
             X[f"UAV_{j}_target_y"][row] = (X[f"UAV_{j}_target_y"][row] - min_y) / (max_y - min_y)
             X[f"UAV_{j}_vx"][row] = X[f"UAV_{j}_vx"][row] / (max_x - min_x)
             X[f"UAV_{j}_vy"][row] = X[f"UAV_{j}_vy"][row] / (max_y - min_y)
+
+        # If has "min_CPA" column, we normalize it
+        if "min_CPA" in X.columns:
+            X["min_CPA"][row] = X["min_CPA"][row] / (max_x - min_x)
     return X
 
 def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:

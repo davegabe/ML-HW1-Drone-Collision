@@ -13,9 +13,10 @@
 
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 from imblearn.over_sampling import SMOTE, RandomOverSampler
 from imblearn.combine import SMOTETomek
 from sklearn.naive_bayes import GaussianNB
@@ -23,12 +24,11 @@ from utils import Approaches, custom_oversampling, custom_oversampling_minority,
 
 
 file = "./data/train_set.tsv"
-seed = 1
 test_size = 0.2
-oversampling_approach: Approaches = "CUSTOM"
+oversampling_approach: Approaches = "SMOTETomek"
 pre_over_sampling_approach: Approaches = "CUSTOM"
 
-def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def load_dataset(seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Load the dataset from the file.
     
@@ -57,10 +57,10 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # Since the dataset is unbalanced, we have to balance it
     print(f" - Balancing the dataset ({oversampling_approach})...")
     if pre_over_sampling_approach == "CUSTOM":
-        X_train, y_train = custom_oversampling_minority(X_train, y_train, 50)
+        X_train, y_train = custom_oversampling_minority(X_train, y_train, 10)
     elif pre_over_sampling_approach == "RandomOverSampler":
-        smote = RandomOverSampler(random_state=seed, sampling_strategy='minority')
-        X_train, y_train = smote.fit_resample(X_train, y_train)
+        randomversampler = RandomOverSampler(random_state=seed, sampling_strategy='minority')
+        X_train, y_train = randomversampler.fit_resample(X_train, y_train)
 
     if oversampling_approach == "SMOTETomek":
         print(" - SMOTETomek")
@@ -73,7 +73,7 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     
     return X_train, X_test, y_train, y_test
 
-def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> None:
+def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> None:
     """
     Train a logistic regression model and evaluate it.
     
@@ -98,7 +98,7 @@ def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nda
     print(accuracy_score(y_test, y_pred))
     print('Cross Validation')
 
-def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> None:
+def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> None:
     """
     Train a Gaussian Naive Bayes model and evaluate it.
     
@@ -121,24 +121,56 @@ def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nd
     print(accuracy_score(y_test, y_pred))
     print('Cross Validation')
 
-def main():
+def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> None:
+    """
+    Train a random forest model and evaluate it.
+    
+    Args:
+        X_train: training set
+        X_test: test set
+        y_train: training labels
+        y_test: test labels
+    """
+    print(" - Training a random forest model...")
+    # Use sklearn to train a random forest model
+    classifier = RandomForestClassifier(n_estimators=50, random_state=seed)
+    classifier.fit(X_train, y_train)
+    # Evaluate the model
+    y_pred = classifier.predict(X_test)
+    print('Random Forest')
+    print('Confusion Matrix')
+    print(confusion_matrix(y_test, y_pred))
+    print('Accuracy')
+    print(accuracy_score(y_test, y_pred))
+    # F1 score
+    print('F1 score')
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    print(f1)
+    return f1, (y_test, y_pred)
+
+def main(seed: int) -> tuple[dict, dict]:
     """
     Classification problem: estimate the total number conflicts between UAVs given the provided features.
     """
     # Set the seed
     np.random.seed(seed)
     # Load the dataset
-    X_train, X_test, y_train, y_test = load_dataset()
+    X_train, X_test, y_train, y_test = load_dataset(seed)
 
-    # Train the model using 4 different classifiers
-    # 1. Logistic Regression
-    logistic_regression(X_train, X_test, y_train, y_test)
-    # 2. Gaussian Naive Bayes
-    # gaussian_naive_bayes(X_train, X_test, y_train, y_test)
+    scores = dict()
+    predict = dict()
+    # Train the model using 4 different classifiers for imbalanced data
+    # 1. Random Forest
+    scores["Random Forest"], predict["Random Forest"] = random_forest(X_train, X_test, y_train, y_test, seed)
+    # 2. SVM
+    # svm(X_train, X_test, y_train, y_test, seed)
+    # 3. Logistic Regression
+    # logistic_regression(X_train, X_test, y_train, y_test, seed)
+    # 4. Gaussian Naive Bayes
+    # gaussian_naive_bayes(X_train, X_test, y_train, y_test, seed)
+
+    return scores, predict
 
 
 if __name__ == '__main__':
-    main()
-
-    # SVM usando il giusto algoritmo
-    
+    main(seed=42)
