@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-Approaches = Literal['NONE', 'SMOTE', 'RANDOM_OVER_SAMPLING', 'SMOTE+RANDOM_OVER_SAMPLING', 'CUSTOM']
+Approaches = Literal['NONE', 'SMOTE', 'RANDOM_OVER_SAMPLING', 'CUSTOM']
+
 
 def normalize_data(X: pd.Series) -> pd.Series:
     """
@@ -58,6 +59,7 @@ def normalize_data(X: pd.Series) -> pd.Series:
             X["min_CPA"][row] = X["min_CPA"][row] / (max_x - min_x)
     return X
 
+
 def normalize_data_rect(X: pd.Series) -> pd.Series:
     """
     Normalize the data.
@@ -104,6 +106,7 @@ def normalize_data_rect(X: pd.Series) -> pd.Series:
             X["min_CPA"][row] = X["min_CPA"][row] / (max_x - min_x)
     return X
 
+
 def normalize_all(X: pd.Series) -> pd.Series:
     """
     Normalize the data. 
@@ -119,6 +122,7 @@ def normalize_all(X: pd.Series) -> pd.Series:
     # Normalize all the features of the dataset
     X = X - X.min() / (X.max() - X.min())
     return X
+
 
 def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     """
@@ -178,6 +182,7 @@ def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd
     y_resampled = pd.Series(y_resampled, name=y.name)
     return X_resampled, y_resampled
 
+
 def custom_oversampling_all(X: pd.DataFrame, y: pd.Series, count: int) -> tuple[pd.DataFrame, pd.Series]:
     """
     Custom oversampling for all classes add a specific number of samples.
@@ -231,7 +236,7 @@ def custom_oversampling_all(X: pd.DataFrame, y: pd.Series, count: int) -> tuple[
     return X_resampled, y_resampled
 
 
-def custom_oversampling_minority(X: pd.DataFrame, y: pd.Series, count:int) -> tuple[pd.DataFrame, pd.Series]:
+def custom_oversampling_minority(X: pd.DataFrame, y: pd.Series, count: int) -> tuple[pd.DataFrame, pd.Series]:
     """
     Custom oversampling for the minority class.
 

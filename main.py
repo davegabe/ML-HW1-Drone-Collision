@@ -6,6 +6,15 @@ import builtins
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score, recall_score
 import seaborn as sns
 
+
+def mute():
+    """
+    Mute the print function.
+    """
+    return
+    builtins.print = lambda *args, **kwargs: None
+
+
 def main():
     """
     Launch classification model on different seeds and plot the results.
@@ -18,7 +27,7 @@ def main():
 
     # Launch the classification model on different seeds
     with Pool(n_processes, initializer=mute) as p:
-        predicts = p.starmap(main_no_angles, [(seed,use_angle) for seed in range(n_processes)])
+        predicts = p.starmap(main_no_angles, [(seed, use_angle) for seed in range(n_processes)])
 
     # For each classifier, compute the average accuracy, precision, recall and f1-score
     for classifier in predicts[0].keys():
@@ -63,14 +72,7 @@ def main():
         plt.legend()
         plt.savefig(f'./results/prediction_{classifier.replace(" ", "_")}.png', dpi=600)
         plt.close()
-    
 
-def mute():
-    """
-    Mute the print function.
-    """
-    return
-    builtins.print = lambda *args, **kwargs: None
 
 if __name__ == '__main__':
     main()

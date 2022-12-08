@@ -20,7 +20,7 @@ pre_over_sampling_approach: Approaches = "CUSTOM"
 def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Load the dataset from the file.
-    
+
     Returns:
         X_train: training set
         X_test: test set
@@ -37,7 +37,7 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     # Remove the columns "UAV_i_track" if not using angles
     if not use_angle:
         X = X.drop(columns=[f"UAV_{i}_track" for i in range(1, 6)])
-        
+
     # Normalize the features
     X = normalize_data(X)
 
@@ -60,13 +60,14 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     elif oversampling_approach == "CUSTOM":
         X_train, y_train = custom_oversampling(X_train, y_train)
         pass
-    
+
     return X_train, X_test, y_train, y_test
+
 
 def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a logistic regression model and evaluate it.
-    
+
     Args:
         X_train: training set
         X_test: test set
@@ -80,10 +81,11 @@ def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nda
     y_pred = classifier.predict(X_test)
     return y_test, y_pred
 
+
 def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a Gaussian Naive Bayes model and evaluate it.
-    
+
     Args:
         X_train: training set
         X_test: test set
@@ -97,10 +99,11 @@ def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.nd
     y_pred = classifier.predict(X_test)
     return y_test, y_pred
 
+
 def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a random forest model and evaluate it.
-    
+
     Args:
         X_train: training set
         X_test: test set
@@ -117,10 +120,11 @@ def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, 
 
     return y_test, y_pred
 
+
 def svm(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a SVM model and evaluate it.
-    
+
     Args:
         X_train: training set
         X_test: test set
@@ -133,6 +137,7 @@ def svm(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np
     # Evaluate the model
     y_pred = classifier.predict(X_test)
     return y_test, y_pred
+
 
 def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """
