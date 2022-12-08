@@ -104,6 +104,22 @@ def normalize_data_rect(X: pd.Series) -> pd.Series:
             X["min_CPA"][row] = X["min_CPA"][row] / (max_x - min_x)
     return X
 
+def normalize_all(X: pd.Series) -> pd.Series:
+    """
+    Normalize the data. 
+    Coordinates are normalized between 0 and 1.
+    Aspects ratios are kept, so the angles are not changed.
+
+    Args:
+        X: dataset
+
+    Returns:
+        X: normalized dataset
+    """
+    # Normalize all the features of the dataset
+    X = X - X.min() / (X.max() - X.min())
+    return X
+
 def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     """
     Custom oversampling for all classes except the majority class.
@@ -140,16 +156,11 @@ def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd
                     drone_y = sample[f"UAV_{k}_y"]
                     vx = sample[f"UAV_{k}_vx"]
                     vy = sample[f"UAV_{k}_vy"]
-                    target_x = sample[f"UAV_{k}_target_x"]
-                    target_y = sample[f"UAV_{k}_target_y"]
-                    # Calculate the angle between the drone and its target (in radians)
-                    angle = np.arccos((target_x - drone_x) / np.sqrt((target_x - drone_x) ** 2 + (target_y - drone_y) ** 2))
-                    # angle = np.arctan2(target_y - drone_y, target_x - drone_x)
                     # Randomly choose a time step
                     time_step = np.random.uniform(0.1, 10)
                     # Move the drone backwards
-                    drone_x -= vx * np.cos(angle) * time_step
-                    drone_y -= vy * np.sin(angle) * time_step
+                    drone_x -= vx * time_step
+                    drone_y -= vy * time_step
                     # Update the features of the drone
                     sample[f"UAV_{k}_x"] = drone_x
                     sample[f"UAV_{k}_y"] = drone_y
@@ -166,6 +177,59 @@ def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd
     X_resampled = pd.DataFrame(X_resampled, columns=X.columns)
     y_resampled = pd.Series(y_resampled, name=y.name)
     return X_resampled, y_resampled
+
+def custom_oversampling_all(X: pd.DataFrame, y: pd.Series, count: int) -> tuple[pd.DataFrame, pd.Series]:
+    """
+    Custom oversampling for all classes add a specific number of samples.
+
+    Args:
+        X: dataset
+        y: labels
+
+    Returns:
+        X: oversampled dataset
+        y: oversampled labels
+    """
+    X_resampled = [X.copy()]
+    y_resampled = [y.copy()]
+    # For each other class
+    for i in range(len(np.bincount(y))):
+        # Find the number of samples in the current class
+        current_class_count = np.bincount(y)[i]
+        # Create synthetic samples
+        for j in range(count):
+            # Take a random sample from the current class
+            rnd = np.random.randint(0, current_class_count)
+            sample = X[y == i].iloc[rnd].copy(deep=True)
+            # For each drone in the sample
+            for k in range(1, 6):
+                # Take all the features of the drone
+                drone_x = sample[f"UAV_{k}_x"]
+                drone_y = sample[f"UAV_{k}_y"]
+                vx = sample[f"UAV_{k}_vx"]
+                vy = sample[f"UAV_{k}_vy"]
+                # Randomly choose a time step
+                time_step = np.random.uniform(0.1, 10)
+                # Move the drone backwards
+                drone_x -= vx * time_step
+                drone_y -= vy * time_step
+                # Update the features of the drone
+                sample[f"UAV_{k}_x"] = drone_x
+                sample[f"UAV_{k}_y"] = drone_y
+            # Add the sample to the dataset
+            X_resampled.append(sample)
+            y_resampled.append(i)
+    # Return the oversampled dataset
+    if sparse.issparse(X):
+        X_resampled = sparse.vstack(X_resampled, format=X.format)
+    else:
+        X_resampled = np.vstack(X_resampled)
+    y_resampled = np.hstack(y_resampled)
+    # Convert to pandas Series
+    X_resampled = pd.DataFrame(X_resampled, columns=X.columns)
+    y_resampled = pd.Series(y_resampled, name=y.name)
+    return X_resampled, y_resampled
+
 
 def custom_oversampling_minority(X: pd.DataFrame, y: pd.Series, count:int) -> tuple[pd.DataFrame, pd.Series]:
     """
@@ -195,16 +259,11 @@ def custom_oversampling_minority(X: pd.DataFrame, y: pd.Series, count:int) -> tu
             drone_y = sample[f"UAV_{k}_y"]
             vx = sample[f"UAV_{k}_vx"]
             vy = sample[f"UAV_{k}_vy"]
-            target_x = sample[f"UAV_{k}_target_x"]
-            target_y = sample[f"UAV_{k}_target_y"]
-            # Calculate the angle between the drone and its target (in radians)
-            angle = np.arccos((target_x - drone_x) / np.sqrt((target_x - drone_x) ** 2 + (target_y - drone_y) ** 2))
-            # angle = np.arctan2(target_y - drone_y, target_x - drone_x)
             # Randomly choose a time step
             time_step = np.random.uniform(0.1, 10)
             # Move the drone backwards
-            drone_x -= vx * np.cos(angle) * time_step
-            drone_y -= vy * np.sin(angle) * time_step
+            drone_x -= vx * time_step
+            drone_y -= vy * time_step
             # Update the features of the drone
             sample[f"UAV_{k}_x"] = drone_x
             sample[f"UAV_{k}_y"] = drone_y

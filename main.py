@@ -32,9 +32,9 @@ def main():
         for predict in predicts:
             y_test, y_pred = predict[classifier]
             accuracy.append(accuracy_score(y_test, y_pred))
-            precision.append(precision_score(y_test, y_pred, average="weighted"))
-            recall.append(recall_score(y_test, y_pred, average="weighted"))
-            f1.append(f1_score(y_test, y_pred, average="weighted"))
+            precision.append(precision_score(y_test, y_pred, average="weighted", zero_division=0))
+            recall.append(recall_score(y_test, y_pred, average="weighted", zero_division=0))
+            f1.append(f1_score(y_test, y_pred, average="weighted", zero_division=0))
 
         print(f"{classifier}:")
         print(f"\tAccuracy: {np.mean(accuracy)}")
@@ -70,6 +70,7 @@ def mute():
     """
     Mute the print function.
     """
+    return
     builtins.print = lambda *args, **kwargs: None
 
 if __name__ == '__main__':
