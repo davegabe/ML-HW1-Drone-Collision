@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from imblearn.over_sampling import SMOTE, RandomOverSampler
@@ -35,7 +36,6 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
 
     # Remove the columns "UAV_i_track" if not using angles
     if not use_angle:
-        # We want to remove UAV_i_track
         X = X.drop(columns=[f"UAV_{i}_track" for i in range(1, 6)])
         
     # Normalize the features
@@ -158,4 +158,11 @@ def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]
 
 
 if __name__ == '__main__':
-    main(seed=42)
+    result = main(seed=42, use_angle=False)
+    for key, value in result.items():
+        print(f"{key}:")
+        print(f" - accuracy: {accuracy_score(value[0], value[1])}")
+        print(f" - precision: {precision_score(value[0], value[1], average='weighted', zero_division=0)}")
+        print(f" - recall: {recall_score(value[0], value[1], average='weighted', zero_division=0)}")
+        print(f" - f1: {f1_score(value[0], value[1], average='weighted', zero_division=0)}")
+        print(f" - confusion matrix: {confusion_matrix(value[0], value[1])}")
