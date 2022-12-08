@@ -29,12 +29,14 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     # Load the dataset
     dataset = pd.read_csv(file, sep='\t', header=0)
 
-    # Split the dataset into features and labels (without UAV_i_track)
-    if use_angle:
-        X = dataset.iloc[:, :-2]
-    else:
-        X = dataset.iloc[:, 1:-2]
+    # Split the dataset into features and labels
+    X = dataset.iloc[:, :-2]
     y = dataset.iloc[:, -2]
+
+    # Remove the columns "UAV_i_track" if not using angles
+    if not use_angle:
+        # We want to remove UAV_i_track
+        X = X.drop(columns=[f"UAV_{i}_track" for i in range(1, 6)])
         
     # Normalize the features
     X = normalize_data(X)
