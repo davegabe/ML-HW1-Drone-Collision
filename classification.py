@@ -113,11 +113,8 @@ def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, 
     # Use sklearn to train a random forest model
     classifier = RandomForestClassifier(n_estimators=80, random_state=seed)
     classifier.fit(X_train, y_train)
-    # confusion matrix
-    y_pred = classifier.predict(X_test)
     # Evaluate the model
     y_pred = classifier.predict(X_test)
-
     return y_test, y_pred
 
 
