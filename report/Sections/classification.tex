@@ -6,6 +6,7 @@ In this section I will describe how I managed the classification task, the way t
 \subsubsection{Feature selection} \label{sec:preprocessing-feature-selection}
 The first step is to select the features that will be used for the classification task.
 The dataset for each drone contains the following 7 features: the position, the velocity and the target position of the drone and the angle between the drone and the target (relative to the north).
+
 I have decided to remove the angle from the dataset because of the redundancy, since it can be computed from the velocity or the target position.
 So now the dataset is composed by $6 \times 5 = 30$ features for the 5 drones in the environment plus the label, which is the number of collisions.
 
@@ -14,6 +15,7 @@ Since the dataset contains features with different ranges, it is necessary to no
 My approach is to normalize each row separately. In fact we can imagine each row as an "environment" with 5 drones referring their coordinates to the point (0,0) in space.
 So we can normalize in a way that the "environment" keeps the same shape, but the values are in the range [0,1].
 To achieve this we have to distinguish two types of values: absolute and relative.
+
 The position of the drone is an absolute value (refer to the point (0,0) in space), while the velocity is a relative value (it's the difference between the current position and the previous one) so it's not good to use the same normalization for both of them.
 So this is the approach that I have decided to use:
 \begin{itemize}
@@ -38,6 +40,7 @@ So this is the approach that I have decided to use:
         minCoord & $\min(minX, minY)$
     \end{conditions}
     In this way, after normalization, the position of the drones (and their target positions) will be in the range [0, 1].
+    
     The sample now represents a new "environment" where the bottom-left corner corresponds at the position of the drone (or the target position) with the smallest x and y coordinates and it will also preserve the aspect ratio of the original one.
     The choice of preserving the aspect ratio is due to testings showing better results.
     
@@ -75,6 +78,7 @@ In details, the number of new samples generated for each class is as in Table~\r
     \caption{Number of samples for each class}
     \label{tab:preprocessing-balancing}
 \end{table}
+
 As we can see, there are more samples generated for the classes with less samples but in a way that the distribution of the classes remains similar to the original one.
 
 \subsection{Training} \label{sec:training}
@@ -101,56 +105,54 @@ The hyperparameters that I have tuned are:
 
 \subsection{Evaluation} \label{sec:evaluation}
 The evaluation of the models is performed using the F1 score, the accuracy and the confusion matrix over the test set, testing on 30 seeds.
-\begin{figure}[h]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[width=0.35\textwidth]{../results/accuracy_Random_Forest.png} &
-        \includegraphics[width=0.35\textwidth]{../results/accuracy_SVM.png} \\
-        \includegraphics[width=0.35\textwidth]{../results/accuracy_Logistic_Regression.png} &
-        \includegraphics[width=0.35\textwidth]{../results/accuracy_Gaussian_Naive_Bayes.png}
-        \centering
-    \end{tabular}
-    \caption{Accuracy of the different classifiers on the test set}
-    \label{fig:accuracy}
-\end{figure}
-
 Since the dataset is unbalanced it is better to use the F1 score instead of the accuracy.
-As shown in Figure~\ref{fig:f1_score}, the Random Forest classifier has the best F1 score, followed by the Logistic Regression classifier.
+As shown in Figure~\ref{fig:f1_score}, the Support Vector Machine classifier has the best F1 score, followed by the Logistic Regression classifier.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[width=0.35\textwidth]{../results/f1_score_Random_Forest.png} &
-        \includegraphics[width=0.35\textwidth]{../results/f1_score_SVM.png} \\
-        \includegraphics[width=0.35\textwidth]{../results/f1_score_Logistic_Regression.png} &
-        \includegraphics[width=0.35\textwidth]{../results/f1_score_Gaussian_Naive_Bayes.png}
+        \includegraphics[width=0.4\textwidth]{../results/f1_score_Random_Forest.png} &
+        \includegraphics[width=0.4\textwidth]{../results/f1_score_SVM.png} \\
+        \includegraphics[width=0.4\textwidth]{../results/f1_score_Logistic_Regression.png} &
+        \includegraphics[width=0.4\textwidth]{../results/f1_score_Gaussian_Naive_Bayes.png}
         \centering
     \end{tabular}
     \caption{F1 score of the different classifiers on the test set}
     \label{fig:f1_score}
 \end{figure}
 
-For further analysis, the confusion matrix of the 4 classifiers is shown in Figure~\ref{fig:confusion_matrix}.
+For further analysis, the confusion matrix of the 4 classifiers is shown in Figure~\ref{fig:confusion_matrix} and the accuracy is shown in Table~\ref{tab:accuracy}.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_Random_Forest.png} &
-        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_SVM.png} \\
-        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_Logistic_Regression.png} &
-        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_Gaussian_Naive_Bayes.png}
+        \includegraphics[width=0.4\textwidth]{../results/confusion_matrix_Random_Forest.png} &
+        \includegraphics[width=0.4\textwidth]{../results/confusion_matrix_SVM.png} \\
+        \includegraphics[width=0.4\textwidth]{../results/confusion_matrix_Logistic_Regression.png} &
+        \includegraphics[width=0.4\textwidth]{../results/confusion_matrix_Gaussian_Naive_Bayes.png}
         \centering
     \end{tabular}
     \caption{Confusion matrix of the different classifiers on the test set}
     \label{fig:confusion_matrix}
 \end{figure}
-
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.4\textwidth]{../results/accuracy_Random_Forest.png} &
+        \includegraphics[width=0.4\textwidth]{../results/accuracy_SVM.png} \\
+        \includegraphics[width=0.4\textwidth]{../results/accuracy_Logistic_Regression.png} &
+        \includegraphics[width=0.4\textwidth]{../results/accuracy_Gaussian_Naive_Bayes.png}
+        \centering
+    \end{tabular}
+    \caption{Accuracy of the different classifiers on the test set}
+    \label{fig:accuracy}
+\end{figure}
 Also a plot with the prediction against the ground truth is shown in Figure~\ref{fig:prediction} to have a better visualization of the performance of the classifiers and to check if they also predict the minority class.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[width=0.35\textwidth]{../results/prediction_Random_Forest.png} &
-        \includegraphics[width=0.35\textwidth]{../results/prediction_SVM.png} \\
-        \includegraphics[width=0.35\textwidth]{../results/prediction_Logistic_Regression.png} &
-        \includegraphics[width=0.35\textwidth]{../results/prediction_Gaussian_Naive_Bayes.png}
+        \includegraphics[width=0.4\textwidth]{../results/prediction_Random_Forest.png} &
+        \includegraphics[width=0.4\textwidth]{../results/prediction_SVM.png} \\
+        \includegraphics[width=0.4\textwidth]{../results/prediction_Logistic_Regression.png} &
+        \includegraphics[width=0.4\textwidth]{../results/prediction_Gaussian_Naive_Bayes.png}
         \centering
     \end{tabular}
     \caption{Prediction of the different classifiers on the test set}

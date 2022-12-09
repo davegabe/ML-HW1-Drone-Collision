@@ -6,13 +6,15 @@ In this section I will describe how I managed the regression task, the way the d
 \subsubsection{Feature selection} \label{sec:preprocessing-feature-selection-regression}
 The first step is to select the features that will be used for the regression task.
 The dataset for each drone contains the following 7 features: the position, the velocity and the target position of the drone and the angle between the drone and the target (relative to the north).
+
 Also in this case, I have removed the angle from the dataset since it can be computed from the positions and the velocity.
 The dataset is then composed by $6 \times 5 = 30$ features for the 5 drones in the environment and the label, which is the minimum CPA (Closest Point of Approach) between the drones.
 
 \subsubsection{Normalization} \label{sec:preprocessing-normalization-regression}
 Since the dataset contains features with different ranges, it is necessary to normalize the dataset.
 Also in this case, the normalization is performed for each row separately respecting the same approach described in Section~\ref{sec:preprocessing-normalization}.
-In this case, also the label have to be normalized and the normalization is performed using the min-max normalization, which is defined as:
+
+In this task, also the label have to be normalized and the normalization is performed using the min-max normalization, which is defined as:
 \begin{equation}
     \label{eq:min-max-normalization}
     \norm(minCPA) = \frac{minCPA - \min(minCPA)}{\max(minCPA) - \min(minCPA)}
@@ -55,13 +57,12 @@ The evaluation of the regression task is performed using the R2 score and the me
         \hline
         \textbf{Support Vector Regression} & -0.09102 & 0.03922 \\
         \hline
-        \textbf{Gradient Boosting Regression} & 0.00721 & 0.03639 \\
+        \textbf{Gradient Boosting Regression} & -0.00721 & 0.03639 \\
         \hline
     \end{tabular}
     \caption{Evaluation of the regression task}
     \label{tab:regression-evaluation}
 \end{table}
-
 Also in this case, a plot of the prediction of the minCPA against the ground truth  using the different regression models is shown in Figure~\ref{fig:prediction-regression}.
 
 \begin{figure}[h]
