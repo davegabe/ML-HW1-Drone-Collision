@@ -168,6 +168,8 @@ def custom_oversampling(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd
                     # Update the features of the drone
                     sample[f"UAV_{k}_x"] = drone_x
                     sample[f"UAV_{k}_y"] = drone_y
+                # Normalize the sample
+                sample = normalize_data(pd.DataFrame([sample.values], columns=sample.index))
                 # Add the sample to the dataset
                 X_resampled.append(sample)
                 y_resampled.append(i)
@@ -221,6 +223,8 @@ def custom_oversampling_all(X: pd.DataFrame, y: pd.Series, count: int) -> tuple[
                 # Update the features of the drone
                 sample[f"UAV_{k}_x"] = drone_x
                 sample[f"UAV_{k}_y"] = drone_y
+            # Normalize the sample
+            sample = normalize_data(pd.DataFrame([sample.values], columns=sample.index))
             # Add the sample to the dataset
             X_resampled.append(sample)
             y_resampled.append(i)

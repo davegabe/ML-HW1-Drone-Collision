@@ -13,8 +13,7 @@ from utils import Approaches, custom_oversampling, custom_oversampling_all, norm
 
 file = "./data/train_set.tsv"
 test_size = 0.2
-oversampling_approach: Approaches = "NONE"
-pre_over_sampling_approach: Approaches = "CUSTOM"
+oversampling_approach: Approaches = "CUSTOM"
 
 
 def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -42,24 +41,14 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     X = normalize_data(X)
 
     # Split the dataset into training and test set, stratified by the labels
-    # print(f" - Splitting the dataset into training ({100-test_size*100}%) and test set ({test_size*100}%)...")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed, stratify=y)
 
-    # Since the dataset is unbalanced, we have to balance it
-    # print(f" - Balancing the dataset ({pre_over_sampling_approach}+{oversampling_approach})...")
-    if pre_over_sampling_approach == "CUSTOM":
-        X_train, y_train = custom_oversampling_all(X_train, y_train, 50)
-    elif pre_over_sampling_approach == "RandomOverSampler":
-        randomversampler = RandomOverSampler(random_state=seed, sampling_strategy='not majority')
-        X_train, y_train = randomversampler.fit_resample(X_train, y_train)
-
     if oversampling_approach == "SMOTETomek":
-        smote = SMOTETomek(random_state=seed, smote=SMOTE(random_state=seed))
-        # smote = SMOTE(random_state=seed)
-        X_train, y_train = smote.fit_resample(X_train, y_train)
+        smote = SMOTE(random_state=seed)
+        smotetomek = SMOTETomek(random_state=seed, smote=smote)
+        X_train, y_train = smotetomek.fit_resample(X_train, y_train)
     elif oversampling_approach == "CUSTOM":
-        X_train, y_train = custom_oversampling(X_train, y_train)
-        pass
+        X_train, y_train = custom_oversampling_all(X_train, y_train, 50)
 
     return X_train, X_test, y_train, y_test
 
