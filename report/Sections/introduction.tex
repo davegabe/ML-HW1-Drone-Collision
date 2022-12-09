@@ -1,23 +1,23 @@
 \section{Introduction}
-In this report I will describe the implementation for the given two tasks about classification and regression about collisions of drones in a 2D environment.
+In this report I will describe the implementation for the given two tasks (classification and regression) about collision detection of drones in a 2D environment.
 
 \subsection{Dataset}
 The dataset is the one provided by the course, it contains 1000 samples of drone collisions in a 2D environment. The dataset contains the following features:
 \begin{itemize}
-    \item \textbf{For 5 UAVs} (where i is the UAV number)):
+    \item \textbf{For 5 UAVs} (where i is the UAV number):
     \begin{itemize}
-        \item \textbf{UAV\_i\_track}: clockwise angle from north between the ith UAV and its target (0, 2*pi)
-        \item \textbf{UAV\_i\_x}: x coordinate of the ith UAV in meters
-        \item \textbf{UAV\_i\_y}: y coordinate of the ith UAV in meters
-        \item \textbf{UAV\_i\_vx}: x velocity of the ith UAV in m/s
-        \item \textbf{UAV\_i\_vy}: y velocity of the ith UAV in m/s
-        \item \textbf{UAV\_i\_target\_x}: x coordinate of the ith UAV target in meters
-        \item \textbf{UAV\_i\_target\_y}: y coordinate of the ith UAV target in meters
+        \item \textbf{UAV\_i\_track}: clockwise angle from north between the i-th UAV and its target (0, 2*pi)
+        \item \textbf{UAV\_i\_x}: x coordinate of the i-th UAV
+        \item \textbf{UAV\_i\_y}: y coordinate of the i-th UAV
+        \item \textbf{UAV\_i\_vx}: x velocity of the i-th UAV
+        \item \textbf{UAV\_i\_vy}: y velocity of the i-th UAV
+        \item \textbf{UAV\_i\_target\_x}: x coordinate of the i-th UAV target
+        \item \textbf{UAV\_i\_target\_y}: y coordinate of the i-th UAV target
     \end{itemize}
-    \item \textbf{num\_collisions}: number of collisions in the sample
-    \item \textbf{min\_CPA}: minimum CPA in the sample (An estimated point in which the distance between two objects, of which at least one is in motion, will reach its minimum value)
+    \item \textbf{num\_collisions}: number of collisions for the sample (0, 1, 2, 3, 4)
+    \item \textbf{min\_CPA}: minimum CPA in the sample (an estimated point in which the distance between two objects, of which at least one is in motion, will reach its minimum value)
 \end{itemize}
-The dataset is unbalanced, as it contains 1000 samples divided into 5 classes (0, 1, 2, 3, 4) that represent the number of collisions in the sample, as shown in (Fig. \ref{fig:dataset_distribution}).
+The dataset is unbalanced, as it contains 1000 samples divided into 5 classes that represent the number of collisions in the sample, as shown in (Fig.~\ref{fig:dataset_distribution}).
 This is also due to the fact that the distribution of the number of collisions is not uniform.
 
 \begin{figure}
@@ -39,21 +39,20 @@ The classification task is to predict the number of collisions in a sample. I wi
 Since the dataset is unbalanced, I expect better results from Random Forest and Support Vector Machine, as they are able to handle unbalanced datasets.
 The following metrics will be used to evaluate the performance of the algorithms:
 \begin{itemize}
-    \item \textbf{Accuracy}: the number of correct predictions divided by the total number of predictions
-    \item \textbf{Precision}: the number of true positives divided by the number of true positives plus the number of false positives
-    \item \textbf{Recall}: the number of true positives divided by the number of true positives plus the number of false negatives
+    \item \textbf{Accuracy}: measures how often the classifier makes the correct prediction
+    \item \textbf{Precision}: measures the model's ability to avoid false positives
+    \item \textbf{Recall}: measures the model's ability to avoid false negatives
     \item \textbf{F1-Score}: the harmonic mean of precision and recall
 \end{itemize}
-Since the dataset is unbalanced, I will use the F1-Score as the main metric to evaluate the performance of the algorithms. I will also use the confusion matrix to visualize the performance of the algorithms.
+Since the dataset is unbalanced, I will use the F1-Score as the main metric to evaluate the performance of the algorithms.
 
 \subsection{Regression}
 The regression task is to predict the minimum CPA in a sample. I will use the following regression algorithms to compare their performance:
 \begin{itemize}
-    \item \textbf{Linear Regression}
-    \item \textbf{Random Forest}
-    \item \textbf{Support Vector Machine}
+    \item \textbf{Support Vector Regression}
+    \item \textbf{Gradient Boosting Regression}
 \end{itemize}
-WThe following metrics will be used to evaluate the performance of the algorithms:
+The following metrics will be used to evaluate the performance of the algorithms:
 \begin{itemize}
     \item \textbf{Mean Squared Error}: the average of the squared differences between the predictions and the actual values
     \item \textbf{R2 Score}: the coefficient of determination, which is a measure of how well the predictions fit the actual values

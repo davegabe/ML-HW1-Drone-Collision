@@ -1,23 +1,20 @@
-\section{Classification Task}
-\label{sec:classification}
-In this section I will describe the classification task that I have implemented, the way the dataset has been preprocessed and the results obtained with the different models.
+\section{Classification Task} \label{sec:classification}
+In this section I will describe how I managed the classification task, the way the dataset has been preprocessed and the results obtained with the different models.
 
-\subsection{Data Preprocessing}
-\label{sec:preprocessing}
+\subsection{Data Preprocessing} \label{sec:preprocessing}
 
-\subsubsection{Feature selection}
-\label{sec:preprocessing-feature-selection}
+\subsubsection{Feature selection} \label{sec:preprocessing-feature-selection}
 The first step is to select the features that will be used for the classification task.
 The dataset for each drone contains the following 7 features: the position, the velocity and the target position of the drone and the angle between the drone and the target (relative to the north).
-Since the angle is redundant since it can be computed from the position and the velocity (or also from the position and the target position), I have decided to remove it from the dataset.
-The dataset is then composed by $6 \times 5 = 30$ features for the 5 drones in the environment and the label, which is the number of collisions.
+I have decided to remove the angle from the dataset because of the redundancy, since it can be computed from the velocity or the target position.
+So now the dataset is composed by $6 \times 5 = 30$ features for the 5 drones in the environment plus the label, which is the number of collisions.
 
-\subsubsection{Normalization}
-\label{sec:preprocessing-normalization}
+\subsubsection{Normalization} \label{sec:preprocessing-normalization}
 Since the dataset contains features with different ranges, it is necessary to normalize the dataset.
-Since each row represents an environment, the normalization is performed for each row separately.
-The dataset also have data with different semantic meaning, so it is not possible to use a global normalization.
-In fact the position of the drone is an absolute value (refer to the point (0,0) in space), while the velocity is a relative value (it's the difference between the current position and the previous one) it's not good to use the same normalization for both of them.
+My approach is to normalize each row separately. In fact we can imagine each row as an "environment" with 5 drones referring their coordinates to the point (0,0) in space.
+So we can normalize in a way that the "environment" keeps the same shape, but the values are in the range [0,1].
+To achieve this we have to distinguish two types of values: absolute and relative.
+The position of the drone is an absolute value (refer to the point (0,0) in space), while the velocity is a relative value (it's the difference between the current position and the previous one) so it's not good to use the same normalization for both of them.
 So this is the approach that I have decided to use:
 \begin{itemize}
     \item \textbf{Positions}: since position and target position have an absolute meaning, I have used the min-max normalization for each row with the following formula:
@@ -42,7 +39,7 @@ So this is the approach that I have decided to use:
     \end{conditions}
     In this way, after normalization, the position of the drones (and their target positions) will be in the range [0, 1].
     The sample now represents a new "environment" where the bottom-left corner corresponds at the position of the drone (or the target position) with the smallest x and y coordinates and it will also preserve the aspect ratio of the original one.
-    The chose about preserving the aspect ratio is because it showed better results in the experiments.
+    The choice of preserving the aspect ratio is due to testings showing better results.
     
     \item \textbf{Velocity}: since it has a relative meaning, have been used the predefined $maxCoord$ and $minCoord$ values to normalize the data with the following formula:
     \begin{equation}
@@ -52,52 +49,47 @@ So this is the approach that I have decided to use:
     \end{equation}
 \end{itemize}
 
-\subsubsection{Splitting}
-\label{sec:preprocessing-splitting}
+\subsubsection{Splitting} \label{sec:preprocessing-splitting}
 The dataset has been splitted in training and test set with a ratio of 80/20 in a stratified way, so that the distribution of the classes is the same in the training and test set.
 
-\subsubsection{Balancing}
-\label{sec:preprocessing-balancing}
+\subsubsection{Balancing} \label{sec:preprocessing-balancing}
 The dataset is unbalanced, so it is necessary to balance it.
-I have tried different methods for oversampling but since there are $<3$ samples of the minority class after splitting, the standard oversampling (such as SMOTE or Random Over Sampling) methods are not really effective.
+I have tried different methods for oversampling but since there are $<3$ samples of the minority class after splitting it, the standard oversampling (such as SMOTE or Random Over Sampling) methods are not really effective.
 Therefore, I have decided to implement my own oversampling method.
 
 The idea is to use the semantic meaning of the dataset to generate new samples.
-The environment is a 2D plane with drones having a position, a velocity and a target.
+Using the same concept of the normalization, we can imagine each sample as an "environment" with 5 drones.
 So I have decided to generate new samples by changing the position of the drones, keeping the velocity and the angle between the drone and the target constant.
-In fact it is possible to move the drones backwards (using the inverse of velocity) and in this way new samples having the same number of collisions can be generated.
+In this way it is possible to move the drones backwards (using the inverse of velocity) to generate new samples having the same number of collisions.
 
-Since the distribution of the classes is not uniform (e.g. the probability of having 4 collisons is lower than the probability of having 3 collisions or 2 collisions, etc.), I have decided to generate new samples for each class separately.
-The number of new samples generated for each class is proportional to the number of samples of the minority class.
-In details, the number of new samples generated for each class is as in Table \ref{tab:preprocessing-balancing}.
+Since the probability of the event is not uniform (e.g. the probability of having 4 collisins is lower than the probability of having 3 collisions or 2 collisions, etc.), it makes sense to keep a similar distribution of the classes after oversampling.
+So I have decided to generate new samples generated for each class (and not just for the minority class) in a way that the distribution of the classes keeps its trend.
+In details, the number of new samples generated for each class is as in Table~\ref{tab:preprocessing-balancing}.
 \begin{table}[h]
     \centering
     \begin{tabular}{|c|c|c|c|c|c|}
         \hline
         & \textbf{Class 0} & \textbf{Class 1} & \textbf{Class 2} & \textbf{Class 3} & \textbf{Class 4} \\ \hline
-        \textbf{Number of samples} & 50 & 55 & 65 & 70 & 75 \\ \hline
+        \textbf{Samples generated} & 50 & 55 & 65 & 70 & 75 \\ \hline
     \end{tabular}
     \caption{Number of samples for each class}
     \label{tab:preprocessing-balancing}
 \end{table}
+As we can see, there are more samples generated for the classes with less samples but in a way that the distribution of the classes remains similar to the original one.
 
-\subsection{Training}
-\label{sec:training}
+\subsection{Training} \label{sec:training}
 
-\subsubsection{Classification models}
-\label{sec:training-classifier-selection}
+\subsubsection{Classification models} \label{sec:training-classifier-selection}
 I have compared different classifiers for this task.
 \begin{itemize}
-    \item \textbf{Logistic Regression}
-    \item \textbf{Random Forest}
-    \item \textbf{Support Vector Machine}
-    \item \textbf{Gaussian Naive Bayes}
+    \item \textbf{Logistic Regression}: LogisticRegression from the scikit-learn library.
+    \item \textbf{Random Forest}: RandomForestClassifier from the scikit-learn library.
+    \item \textbf{Support Vector Machine}: SVC from the scikit-learn library.
+    \item \textbf{Gaussian Naive Bayes}: GaussianNB from the scikit-learn library.
 \end{itemize}
 
 
-
-\subsubsection{Hyperparameter tuning}
-\label{sec:training-hyperparameter-tuning}
+\subsubsection{Hyperparameter tuning} \label{sec:training-hyperparameter-tuning}
 I have used the GridSearchCV method to tune the hyperparameters of the classifiers, using the F1 score as the metric to optimize.
 The hyperparameters that I have tuned are:
 \begin{itemize}
@@ -107,9 +99,8 @@ The hyperparameters that I have tuned are:
     \item \textbf{Gaussian Naive Bayes}: var\_smoothing
 \end{itemize}
 
-\subsection{Evaluation}
-\label{sec:evaluation}
-The evaluation of the models is performed using the F1 score, the accuracy and the confusion matrix.
+\subsection{Evaluation} \label{sec:evaluation}
+The evaluation of the models is performed using the F1 score, the accuracy and the confusion matrix over the test set, testing on 30 seeds.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
@@ -123,8 +114,8 @@ The evaluation of the models is performed using the F1 score, the accuracy and t
     \label{fig:accuracy}
 \end{figure}
 
-Since the dataset is unbalanced it is better to use the F1 score instead of the accuracy, which is the harmonic mean of the precision and the recall.
-As shown in Figure \ref{fig:f1_score}, the Random Forest classifier has the best F1 score, followed by the Logistic Regression classifier.
+Since the dataset is unbalanced it is better to use the F1 score instead of the accuracy.
+As shown in Figure~\ref{fig:f1_score}, the Random Forest classifier has the best F1 score, followed by the Logistic Regression classifier.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
@@ -138,7 +129,7 @@ As shown in Figure \ref{fig:f1_score}, the Random Forest classifier has the best
     \label{fig:f1_score}
 \end{figure}
 
-For further analysis, the confusion matrix of the 4 classifiers is shown in Figure \ref{fig:confusion_matrix}.
+For further analysis, the confusion matrix of the 4 classifiers is shown in Figure~\ref{fig:confusion_matrix}.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
@@ -152,16 +143,37 @@ For further analysis, the confusion matrix of the 4 classifiers is shown in Figu
     \label{fig:confusion_matrix}
 \end{figure}
 
-Also a plot with the prediction against the ground truth is shown in Figure \ref{fig:prediction} to have a better visualization of the performance of the classifiers and to check if they also predict the minority class.
+Also a plot with the prediction against the ground truth is shown in Figure~\ref{fig:prediction} to have a better visualization of the performance of the classifiers and to check if they also predict the minority class.
 \begin{figure}[h]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[width=0.4\textwidth]{../results/prediction_Random_Forest.png} &
-        \includegraphics[width=0.4\textwidth]{../results/prediction_SVM.png} \\
-        \includegraphics[width=0.4\textwidth]{../results/prediction_Logistic_Regression.png} &
-        \includegraphics[width=0.4\textwidth]{../results/prediction_Gaussian_Naive_Bayes.png}
+        \includegraphics[width=0.35\textwidth]{../results/prediction_Random_Forest.png} &
+        \includegraphics[width=0.35\textwidth]{../results/prediction_SVM.png} \\
+        \includegraphics[width=0.35\textwidth]{../results/prediction_Logistic_Regression.png} &
+        \includegraphics[width=0.35\textwidth]{../results/prediction_Gaussian_Naive_Bayes.png}
         \centering
     \end{tabular}
     \caption{Prediction of the different classifiers on the test set}
     \label{fig:prediction}
 \end{figure}
+
+We summarize the results in Table~\ref{tab:results-classification}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{Accuracy} & \textbf{F1 Score} \\
+        \hline
+        \textbf{Random Forest} & 0.51116 & 0.42739 \\
+        \hline
+        \textbf{Support Vector Machine} & 0.47850 & 0.45794 \\
+        \hline
+        \textbf{Logistic Regression} & 0.49133 & 0.41088 \\
+        \hline
+        \textbf{Gaussian Naive Bayes} & 0.44467 & 0.42329 \\
+        \hline
+    \end{tabular}
+    \caption{Evaluation of the regression task}
+    \label{tab:results-classification}
+\end{table}

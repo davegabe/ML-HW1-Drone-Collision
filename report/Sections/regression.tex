@@ -1,53 +1,75 @@
-\section{Regression Task}
-\label{sec:regression}
-In this section I will describe the regression task that I have implemented, the way the dataset has been preprocessed and the results obtained with the different models.
+\section{Regression Task} \label{sec:regression}
+In this section I will describe how I managed the regression task, the way the dataset has been preprocessed and the results obtained with the different models.
 
-\subsection{Data Preprocessing}
-\label{sec:preprocessing}
+\subsection{Data Preprocessing} \label{sec:preprocessing-regression}
 
-\subsubsection{Feature selection}
-\label{sec:preprocessing-feature-selection}
+\subsubsection{Feature selection} \label{sec:preprocessing-feature-selection-regression}
 The first step is to select the features that will be used for the regression task.
 The dataset for each drone contains the following 7 features: the position, the velocity and the target position of the drone and the angle between the drone and the target (relative to the north).
-Also in this case, I have removed the angle from the dataset since it can be computed from the position and the velocity.
+Also in this case, I have removed the angle from the dataset since it can be computed from the positions and the velocity.
 The dataset is then composed by $6 \times 5 = 30$ features for the 5 drones in the environment and the label, which is the minimum CPA (Closest Point of Approach) between the drones.
 
-\subsubsection{Normalization}
-\label{sec:preprocessing-normalization}
+\subsubsection{Normalization} \label{sec:preprocessing-normalization-regression}
 Since the dataset contains features with different ranges, it is necessary to normalize the dataset.
 Also in this case, the normalization is performed for each row separately respecting the same approach described in Section~\ref{sec:preprocessing-normalization}.
-In this case, the normalization is performed also for the label. The minimum CPA is a relative value, so it can used the same normalization applied to velocity.
-
+In this case, also the label have to be normalized and the normalization is performed using the min-max normalization, which is defined as:
 \begin{equation}
-    \norm(minCPA_{D^i}) = \frac{minCPA_{D^i}}{maxCoord - minCoord}
+    \label{eq:min-max-normalization}
+    \norm(minCPA) = \frac{minCPA - \min(minCPA)}{\max(minCPA) - \min(minCPA)}
 \end{equation}
 Where:
 \begin{conditions}
-    maxX & $\max\limits_{1 \leq i \leq 5} x_{D^i}$\\
-
-    maxY & $\max\limits_{1 \leq i \leq 5} y_{D^i}$\\
-
-    minX & $\min\limits_{1 \leq i \leq 5} x_{D^i}$\\
-
-    minY & $\min\limits_{1 \leq i \leq 5} y_{D^i}$\\
-
-    maxCoord & $\max(maxX, maxY)$\\
-
-    minCoord & $\min(minX, minY)$
+    min(minCPA) & is the minimum value of minCPA in the dataset \\
+    max(minCPA) & is the maximum value of minCPA in the dataset
 \end{conditions}
 
-\subsubsection{Splitting}
-\label{sec:preprocessing-splitting}
+
+\subsubsection{Splitting} \label{sec:preprocessing-splitting-regression}
 The dataset has been splitted in training and test set with a ratio of 80/20.
 
-\subsection{Training}
-\label{sec:training}
+\subsection{Training} \label{sec:training-regression}
 
-\subsubsection{Regression models}
-\label{sec:training-regression-models}
+\subsubsection{Regression models} \label{sec:training-regression-models-regression}
+I have implemented the following regression models:
+\begin{itemize}
+    \item \textbf{Support Vector Regression}: SVR model from the scikit-learn library.
+    \item \textbf{Gradient Boosting Regression}: GradientBoostingRegressor model from the scikit-learn library.
+\end{itemize}
 
-\subsubsection{Hyperparameter tuning}
-\label{sec:training-hyperparameter-tuning}
+\subsubsection{Hyperparameter tuning} \label{sec:training-hyperparameter-tuning-regression}
+I have used the GridSearchCV method to tune the hyperparameters of the classifiers, using the R2 score as the metric to optimize.
+The hyperparameters that I have tuned are:
+\begin{itemize}
+    \item \textbf{Support Vector Regression}: C, gamma, kernel
+    \item \textbf{Gradient Boosting Regression}: n\_estimators, max\_features, learning\_rate, loss
+\end{itemize}
 
 \subsection{Evaluation}
-\label{sec:evaluation}
+The evaluation of the regression task is performed using the R2 score and the mean squared error, shown in Table~\ref{tab:regression-evaluation}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{R2 score} & \textbf{MSE} \\
+        \hline
+        \textbf{Support Vector Regression} & -0.09102 & 0.03922 \\
+        \hline
+        \textbf{Gradient Boosting Regression} & 0.00721 & 0.03639 \\
+        \hline
+    \end{tabular}
+    \caption{Evaluation of the regression task}
+    \label{tab:regression-evaluation}
+\end{table}
+
+Also in this case, a plot of the prediction of the minCPA against the ground truth  using the different regression models is shown in Figure~\ref{fig:prediction-regression}.
+
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.35\textwidth]{../results/prediction_Support_Vector_Regression.png} &
+        \includegraphics[width=0.35\textwidth]{../results/prediction_Gradient_Boosting_Regression.png}
+    \end{tabular}
+    \caption{Prediction of the minCPA for the test set using the different regression models}
+    \label{fig:prediction-regression}
+\end{figure}
