@@ -67,7 +67,19 @@ The environment is a 2D plane with drones having a position, a velocity and a ta
 So I have decided to generate new samples by changing the position of the drones, keeping the velocity and the angle between the drone and the target constant.
 In fact it is possible to move the drones backwards (using the inverse of velocity) and in this way new samples having the same number of collisions can be generated.
 
-Since the distribution of the classes is not uniform (e.g. the probability of having 4 collisons is lower than the probability of having 3 collisions or 2 collisions, etc.), I have decided to generate same number of samples for each class.
+Since the distribution of the classes is not uniform (e.g. the probability of having 4 collisons is lower than the probability of having 3 collisions or 2 collisions, etc.), I have decided to generate new samples for each class separately.
+The number of new samples generated for each class is proportional to the number of samples of the minority class.
+In details, the number of new samples generated for each class is as in Table \ref{tab:preprocessing-balancing}.
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        & \textbf{Class 0} & \textbf{Class 1} & \textbf{Class 2} & \textbf{Class 3} & \textbf{Class 4} \\ \hline
+        \textbf{Number of samples} & 50 & 55 & 65 & 70 & 75 \\ \hline
+    \end{tabular}
+    \caption{Number of samples for each class}
+    \label{tab:preprocessing-balancing}
+\end{table}
 
 \subsection{Training}
 \label{sec:training}
@@ -86,16 +98,70 @@ I have compared different classifiers for this task.
 
 \subsubsection{Hyperparameter tuning}
 \label{sec:training-hyperparameter-tuning}
-I have used the GridSearchCV method to tune the hyperparameters of the classifiers.
+I have used the GridSearchCV method to tune the hyperparameters of the classifiers, using the F1 score as the metric to optimize.
 The hyperparameters that I have tuned are:
 \begin{itemize}
-    \item \textbf{Logistic Regression}: C
-    \item \textbf{Random Forest}: n\_estimators, max\_depth
-    \item \textbf{Support Vector Machine}: C, gamma
+    \item \textbf{Random Forest}: n\_estimators, max\_features, criterion
+    \item \textbf{Support Vector Machine}: C, gamma, kernel
+    \item \textbf{Logistic Regression}: C, penalty, solver
     \item \textbf{Gaussian Naive Bayes}: var\_smoothing
 \end{itemize}
-The best hyperparameters for each classifier are reported in Table [...].
 
 \subsection{Evaluation}
 \label{sec:evaluation}
-[...]
+The evaluation of the models is performed using the F1 score, the accuracy and the confusion matrix.
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.35\textwidth]{../results/accuracy_Random_Forest.png} &
+        \includegraphics[width=0.35\textwidth]{../results/accuracy_SVM.png} \\
+        \includegraphics[width=0.35\textwidth]{../results/accuracy_Logistic_Regression.png} &
+        \includegraphics[width=0.35\textwidth]{../results/accuracy_Gaussian_Naive_Bayes.png}
+        \centering
+    \end{tabular}
+    \caption{Accuracy of the different classifiers on the test set}
+    \label{fig:accuracy}
+\end{figure}
+
+Since the dataset is unbalanced it is better to use the F1 score instead of the accuracy, which is the harmonic mean of the precision and the recall.
+As shown in Figure \ref{fig:f1_score}, the Random Forest classifier has the best F1 score, followed by the Logistic Regression classifier.
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.35\textwidth]{../results/f1_score_Random_Forest.png} &
+        \includegraphics[width=0.35\textwidth]{../results/f1_score_SVM.png} \\
+        \includegraphics[width=0.35\textwidth]{../results/f1_score_Logistic_Regression.png} &
+        \includegraphics[width=0.35\textwidth]{../results/f1_score_Gaussian_Naive_Bayes.png}
+        \centering
+    \end{tabular}
+    \caption{F1 score of the different classifiers on the test set}
+    \label{fig:f1_score}
+\end{figure}
+
+For further analysis, the confusion matrix of the 4 classifiers is shown in Figure \ref{fig:confusion_matrix}.
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_Random_Forest.png} &
+        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_SVM.png} \\
+        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_Logistic_Regression.png} &
+        \includegraphics[width=0.35\textwidth]{../results/confusion_matrix_Gaussian_Naive_Bayes.png}
+        \centering
+    \end{tabular}
+    \caption{Confusion matrix of the different classifiers on the test set}
+    \label{fig:confusion_matrix}
+\end{figure}
+
+Also a plot with the prediction against the ground truth is shown in Figure \ref{fig:prediction} to have a better visualization of the performance of the classifiers and to check if they also predict the minority class.
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.4\textwidth]{../results/prediction_Random_Forest.png} &
+        \includegraphics[width=0.4\textwidth]{../results/prediction_SVM.png} \\
+        \includegraphics[width=0.4\textwidth]{../results/prediction_Logistic_Regression.png} &
+        \includegraphics[width=0.4\textwidth]{../results/prediction_Gaussian_Naive_Bayes.png}
+        \centering
+    \end{tabular}
+    \caption{Prediction of the different classifiers on the test set}
+    \label{fig:prediction}
+\end{figure}
