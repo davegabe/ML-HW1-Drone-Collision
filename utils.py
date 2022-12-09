@@ -199,12 +199,14 @@ def custom_oversampling_all(X: pd.DataFrame, y: pd.Series, count: int) -> tuple[
     """
     X_resampled = [X.copy()]
     y_resampled = [y.copy()]
-    # For each other class
+    # For each class (starting from the majority class to the minority class)
     for i in range(len(np.bincount(y))):
         # Find the number of samples in the current class
         current_class_count = np.bincount(y)[i]
+        # How percentage of samples we need to create
+        percentage = [1, 1.1, 1.3, 1.4, 1.5]
         # Create synthetic samples
-        for j in range(count):
+        for j in range(int(count*percentage[i])):
             # Take a random sample from the current class
             rnd = np.random.randint(0, current_class_count)
             sample = X[y == i].iloc[rnd].copy(deep=True)
