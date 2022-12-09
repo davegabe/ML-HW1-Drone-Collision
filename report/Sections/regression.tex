@@ -1,17 +1,44 @@
 \section{Regression Task}
 \label{sec:regression}
+In this section I will describe the regression task that I have implemented, the way the dataset has been preprocessed and the results obtained with the different models.
 
 \subsection{Data Preprocessing}
 \label{sec:preprocessing}
 
 \subsubsection{Feature selection}
 \label{sec:preprocessing-feature-selection}
+The first step is to select the features that will be used for the regression task.
+The dataset for each drone contains the following 7 features: the position, the velocity and the target position of the drone and the angle between the drone and the target (relative to the north).
+Also in this case, I have removed the angle from the dataset since it can be computed from the position and the velocity.
+The dataset is then composed by $6 \times 5 = 30$ features for the 5 drones in the environment and the label, which is the minimum CPA (Closest Point of Approach) between the drones.
 
 \subsubsection{Normalization}
 \label{sec:preprocessing-normalization}
+Since the dataset contains features with different ranges, it is necessary to normalize the dataset.
+Also in this case, the normalization is performed for each row separately respecting the same approach described in Section~\ref{sec:preprocessing-normalization}.
+In this case, the normalization is performed also for the label. The minimum CPA is a relative value, so it can used the same normalization applied to velocity.
+
+\begin{equation}
+    \norm(minCPA_{D^i}) = \frac{minCPA_{D^i}}{maxCoord - minCoord}
+\end{equation}
+Where:
+\begin{conditions}
+    maxX & $\max\limits_{1 \leq i \leq 5} x_{D^i}$\\
+
+    maxY & $\max\limits_{1 \leq i \leq 5} y_{D^i}$\\
+
+    minX & $\min\limits_{1 \leq i \leq 5} x_{D^i}$\\
+
+    minY & $\min\limits_{1 \leq i \leq 5} y_{D^i}$\\
+
+    maxCoord & $\max(maxX, maxY)$\\
+
+    minCoord & $\min(minX, minY)$
+\end{conditions}
 
 \subsubsection{Splitting}
 \label{sec:preprocessing-splitting}
+The dataset has been splitted in training and test set with a ratio of 80/20.
 
 \subsection{Training}
 \label{sec:training}
