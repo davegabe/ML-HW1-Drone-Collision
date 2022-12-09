@@ -32,10 +32,9 @@ This is also due to the fact that the distribution of the number of collisions i
 The classification task is to predict the number of collisions in a sample. We will use several classification algorithms to compare their performance. The algorithms we will use are:
 \begin{itemize}
     \item \textbf{Logistic Regression}
-    \item \textbf{Decision Tree}
     \item \textbf{Random Forest}
     \item \textbf{Support Vector Machine}
-    \item \textbf{K-Nearest Neighbors}
+    \item \textbf{Gaussian Naive Bayes}
 \end{itemize}
 Since the dataset is unbalanced, we expect better results from Random Forest and Support Vector Machine, as they are able to handle unbalanced datasets.
 We will use the following metrics to evaluate the performance of the algorithms:
@@ -51,15 +50,12 @@ Since the dataset is unbalanced, we will use the F1-Score as the main metric to 
 The regression task is to predict the minimum CPA in a sample. We will use several regression algorithms to compare their performance. The algorithms we will use are:
 \begin{itemize}
     \item \textbf{Linear Regression}
-    \item \textbf{Decision Tree}
     \item \textbf{Random Forest}
     \item \textbf{Support Vector Machine}
-    \item \textbf{K-Nearest Neighbors}
 \end{itemize}
 We will use the following metrics to evaluate the performance of the algorithms:
 \begin{itemize}
-    \item \textbf{Mean Absolute Error}: the average of the absolute differences between the predictions and the actual values
     \item \textbf{Mean Squared Error}: the average of the squared differences between the predictions and the actual values
-    \item \textbf{Root Mean Squared Error}: the square root of the mean squared error
+    \item \textbf{R2 Score}: the coefficient of determination, which is a measure of how well the predictions fit the actual values
 \end{itemize}
 We will use the Root Mean Squared Error as the main metric to evaluate the performance of the algorithms.
