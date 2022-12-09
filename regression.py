@@ -94,7 +94,7 @@ def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]
     predict = dict()
 
     # Random forest regression
-    predict["Random Forest"] = random_forest_regression(X_train, X_test, y_train, y_test, seed)
+    predict["Random Forest Regression"] = random_forest_regression(X_train, X_test, y_train, y_test, seed)
     
     # Support vector regression
     predict["Support Vector Regression"] = support_vector_regression(X_train, X_test, y_train, y_test, seed)

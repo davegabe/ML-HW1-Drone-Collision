@@ -24,11 +24,12 @@ def main_classification():
     predicts: list[dict[str, tuple[np.ndarray, np.ndarray]]] = []
 
     n_processes = 10
+    n_seed = 30
     use_angle = False
 
     # Launch the classification model on different seeds
     with Pool(n_processes, initializer=mute) as p:
-        predicts = p.starmap(classification, [(seed, use_angle) for seed in range(n_processes)])
+        predicts = p.starmap(classification, [(seed, use_angle) for seed in range(n_seed)])
 
     # For each classifier, compute the average accuracy, precision, recall and f1-score
     for classifier in predicts[0].keys():
@@ -72,7 +73,32 @@ def main_classification():
         plt.plot(range(len_arr), y_test, label='Real')
         plt.plot(range(len_arr), y_pred, label='Predicted')
         plt.legend()
-        plt.savefig(f'./results/prediction_{classifier.replace(" ", "_")}.png', dpi=600)
+        filename = f'./results/prediction_{classifier.replace(" ", "_")}.png'
+        plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0.01)
+        plt.close()
+
+        # Plot the f1-score for all the seeds with the average 
+        plt.title(f'F1-score for {classifier}')
+        plt.xlabel('Seeds')
+        plt.ylabel('F1-score')
+        plt.ylim(0.34, 0.52)
+        plt.plot(range(len(f1)), f1, label='F1-score')
+        plt.plot(range(len(f1)), [np.mean(f1)]*len(f1), label='Average', linestyle='--')
+        plt.legend()
+        filename = f'./results/f1_score_{classifier.replace(" ", "_")}.png'
+        plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0.01)
+        plt.close()
+
+        # Plot the accuracy for all the seeds with the average
+        plt.title(f'Accuracy for {classifier}')
+        plt.xlabel('Seeds')
+        plt.ylabel('Accuracy')
+        plt.ylim(0.35, 0.57)
+        plt.plot(range(len(accuracy)), accuracy, label='Accuracy')
+        plt.plot(range(len(accuracy)), [np.mean(accuracy)]*len(accuracy), label='Average', linestyle='--')
+        plt.legend()
+        filename = f'./results/accuracy_{classifier.replace(" ", "_")}.png'
+        plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0.01)
         plt.close()
 
 
@@ -120,7 +146,8 @@ def main_regression():
         plt.scatter(range(len_arr), y_test, label='Real')
         plt.scatter(range(len_arr), y_pred, label='Predicted')
         plt.legend()
-        plt.savefig(f'./results/prediction_{regressor.replace(" ", "_")}.png', dpi=600)
+        filename = f'./results/prediction_{regressor.replace(" ", "_")}.png'
+        plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0.01)
         plt.close()
 
 
