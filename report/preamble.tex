@@ -5,10 +5,18 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
+\usepackage{amsmath}
 \usepackage[export]{adjustbox}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 \usepackage[labelfont=bf,justification=centering,margin=0.5cm]{caption}
+
+\usepackage{array}
+
+
+\newenvironment{conditions}
+  {\par\vspace{\abovedisplayskip}\noindent\begin{tabular}{>{$}l<{$} @{${}={}$} l}}
+  {\end{tabular}\par\vspace{\belowdisplayskip}}
 
 \titleformat*{\section}{\LARGE\bfseries}
 \titleformat*{\subsection}{\Large\bfseries}

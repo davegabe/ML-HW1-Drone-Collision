@@ -1,8 +1,8 @@
 \section{Introduction}
-In this report we will discuss the design and implementation for the given two tasks about classification and regression about collisions of drones ina  2D environment.
+In this report I will describe the implementation for the given two tasks about classification and regression about collisions of drones in a 2D environment.
 
 \subsection{Dataset}
-The dataset we will use is the one provided by the course. It contains 1000 samples of drone collisions in a 2D environment. The dataset contains the following features:
+The dataset is the one provided by the course, it contains 1000 samples of drone collisions in a 2D environment. The dataset contains the following features:
 \begin{itemize}
     \item \textbf{For 5 UAVs} (where i is the UAV number)):
     \begin{itemize}
@@ -29,33 +29,32 @@ This is also due to the fact that the distribution of the number of collisions i
 
 
 \subsection{Classification}
-The classification task is to predict the number of collisions in a sample. We will use several classification algorithms to compare their performance. The algorithms we will use are:
+The classification task is to predict the number of collisions in a sample. I will use several classification algorithms to compare their performance. The algorithms I will use are:
 \begin{itemize}
     \item \textbf{Logistic Regression}
     \item \textbf{Random Forest}
     \item \textbf{Support Vector Machine}
     \item \textbf{Gaussian Naive Bayes}
 \end{itemize}
-Since the dataset is unbalanced, we expect better results from Random Forest and Support Vector Machine, as they are able to handle unbalanced datasets.
-We will use the following metrics to evaluate the performance of the algorithms:
+Since the dataset is unbalanced, I expect better results from Random Forest and Support Vector Machine, as they are able to handle unbalanced datasets.
+The following metrics will be used to evaluate the performance of the algorithms:
 \begin{itemize}
     \item \textbf{Accuracy}: the number of correct predictions divided by the total number of predictions
     \item \textbf{Precision}: the number of true positives divided by the number of true positives plus the number of false positives
     \item \textbf{Recall}: the number of true positives divided by the number of true positives plus the number of false negatives
     \item \textbf{F1-Score}: the harmonic mean of precision and recall
 \end{itemize}
-Since the dataset is unbalanced, we will use the F1-Score as the main metric to evaluate the performance of the algorithms. We will also use the confusion matrix to visualize the performance of the algorithms.
+Since the dataset is unbalanced, I will use the F1-Score as the main metric to evaluate the performance of the algorithms. I will also use the confusion matrix to visualize the performance of the algorithms.
 
 \subsection{Regression}
-The regression task is to predict the minimum CPA in a sample. We will use several regression algorithms to compare their performance. The algorithms we will use are:
+The regression task is to predict the minimum CPA in a sample. I will use the following regression algorithms to compare their performance:
 \begin{itemize}
     \item \textbf{Linear Regression}
     \item \textbf{Random Forest}
     \item \textbf{Support Vector Machine}
 \end{itemize}
-We will use the following metrics to evaluate the performance of the algorithms:
+WThe following metrics will be used to evaluate the performance of the algorithms:
 \begin{itemize}
     \item \textbf{Mean Squared Error}: the average of the squared differences between the predictions and the actual values
     \item \textbf{R2 Score}: the coefficient of determination, which is a measure of how well the predictions fit the actual values
 \end{itemize}
-We will use the Root Mean Squared Error as the main metric to evaluate the performance of the algorithms.

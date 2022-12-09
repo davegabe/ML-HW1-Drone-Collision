@@ -1,0 +1,100 @@
+\section{Classification Task}
+\label{sec:classification}
+
+\subsection{Data Preprocessing}
+\label{sec:preprocessing}
+
+\subsubsection{Feature selection}
+\label{sec:preprocessing-feature-selection}
+The first step is to select the features that will be used for the classification task.
+Tha dataset for each drone contains the following 7 features: the position, the velocity and the target position of the drone and the angle between the drone and the target (relative to the north).
+Since the angle is redundant since it can be computed from the position and the velocity (or also from the position and the target position), I have decided to remove it from the dataset.
+The dataset for each drone is then composed by 6 features.
+
+\subsubsection{Normalization}
+\label{sec:preprocessing-normalization}
+Since the dataset contains features with different ranges, it is necessary to normalize the dataset.
+Since each row represents an environment, the normalization is performed for each row separately.
+The dataset also have data with different semantic meaning, so it is not possible to use a global normalization.
+In fact the position of the drone is an absolute value (refer to the point (0,0) in space), while the velocity is a relative value (it's the difference between the current position and the previous one) it's not good to use the same normalization for both of them.
+So this is the approach that I have decided to use:
+\begin{itemize}
+    \item \textbf{Positions}: since position and target position have an absolute meaning, I have used the min-max normalization for each row with the following formula:
+    \begin{equation}
+            x_{D^i} = \frac{x_{D^i} - minCoord}{maxCoord - minCoord}
+            \qquad \qquad
+            y_{D^i} = \frac{y_{D^i} - minCoord}{maxCoord - minCoord}
+    \end{equation}
+    Where:
+    \begin{conditions}
+        maxX & $\max\limits_{1 \leq i \leq 5} x_{D^i}$\\
+
+        maxY & $\max\limits_{1 \leq i \leq 5} y_{D^i}$\\
+    
+        minX & $\min\limits_{1 \leq i \leq 5} x_{D^i}$\\
+
+        minY & $\min\limits_{1 \leq i \leq 5} y_{D^i}$\\
+
+        maxCoord & $\max(maxX, maxY)$\\
+
+        minCoord & $\min(minX, minY)$
+    \end{conditions}
+    In this way, after normalization, the position of the drones (and their target positions) will be in the range [0, 1].
+    The sample now represents a new "environment" where the bottom-left corner corresponds at the position of the drone (or the target position) with the smallest x and y coordinates and it will also preserve the aspect ratio of the original one.
+    The chose about preserving the aspect ratio is because it showed better results in the experiments.
+    
+    \item \textbf{Velocity}: since it has a relative meaning, have been used the predefined $maxX$, $maxY$, $minX$ and $minY$ values to normalize the data with the following formula:
+    \begin{equation}
+            vx_{D^i} = \frac{x_{D^i}}{maxX - minX}
+            \qquad \qquad
+            vy_{D^i} = \frac{y_{D^i}}{maxY - minY}
+    \end{equation}
+\end{itemize}
+
+\subsubsection{Splitting}
+\label{sec:preprocessing-splitting}
+The dataset is split in training and test set with a ratio of 80/20 in a stratified way, so that the distribution of the classes is the same in the training and test set.
+
+\subsubsection{Balancing}
+\label{sec:preprocessing-balancing}
+The dataset is unbalanced, so it is necessary to balance it.
+I have tried different methods for oversampling but since we have $<3$ samples of the minority class after splitting, the standard oversampling (such as SMOTE or RandomOverSampling) methods are not really effective.
+Therefore, I have decided to implement my own oversampling method.
+
+The idea is to use the semantic meaning of the dataset to generate new samples.
+The environment is a 2D plane with drones having a position, a velocity and a target.
+So I have decided to generate new samples by changing the position of the drones, keeping the velocity and the angle between the drone and the target constant.
+In fact we can move the drones backwards (using the inverse of velocity) and in this way we can generate new samples having the same number of collisions.
+
+Since the distribution of the classes is not uniform (e.g. the probability of having 4 collisons is lower than the probability of having 3 collisions or 2 collisions, etc.), I have decided to generate same number of samples for each class.
+
+\subsection{Training}
+\label{sec:training}
+
+\subsubsection{Classification models}
+\label{sec:training-classifier-selection}
+I have compared different classifiers for this task.
+\begin{itemize}
+    \item \textbf{Logistic Regression}
+    \item \textbf{Random Forest}
+    \item \textbf{Support Vector Machine}
+    \item \textbf{Gaussian Naive Bayes}
+\end{itemize}
+
+
+
+\subsubsection{Hyperparameter tuning}
+\label{sec:training-hyperparameter-tuning}
+I have used the GridSearchCV method to tune the hyperparameters of the classifiers.
+The hyperparameters that I have tuned are:
+\begin{itemize}
+    \item \textbf{Logistic Regression}: C
+    \item \textbf{Random Forest}: n\_estimators, max\_depth
+    \item \textbf{Support Vector Machine}: C, gamma
+    \item \textbf{Gaussian Naive Bayes}: var\_smoothing
+\end{itemize}
+The best hyperparameters for each classifier are reported in Table [...].
+
+\subsection{Evaluation}
+\label{sec:evaluation}
+[...]
