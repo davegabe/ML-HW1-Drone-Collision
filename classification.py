@@ -4,11 +4,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from imblearn.over_sampling import SMOTE, RandomOverSampler
+from imblearn.over_sampling import SMOTE
 from imblearn.combine import SMOTETomek
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
-from utils import Approaches, custom_oversampling, custom_oversampling_all, normalize_data
+from utils import Approaches, custom_oversampling_all, normalize_data
 
 
 file = "./data/train_set.tsv"
@@ -53,42 +53,6 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     return X_train, X_test, y_train, y_test
 
 
-def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Train a logistic regression model and evaluate it.
-
-    Args:
-        X_train: training set
-        X_test: test set
-        y_train: training labels
-        y_test: test labels
-    """
-    # Use sklearn to train a logistic regression model
-    classifier = LogisticRegression(random_state=seed, max_iter=1000)
-    classifier.fit(X_train, y_train)
-    # Evaluate the model
-    y_pred = classifier.predict(X_test)
-    return y_test, y_pred
-
-
-def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Train a Gaussian Naive Bayes model and evaluate it.
-
-    Args:
-        X_train: training set
-        X_test: test set
-        y_train: training labels
-        y_test: test labels
-    """
-    # Use sklearn to train a Gaussian Naive Bayes model
-    classifier = GaussianNB()
-    classifier.fit(X_train, y_train)
-    # Evaluate the model
-    y_pred = classifier.predict(X_test)
-    return y_test, y_pred
-
-
 def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a random forest model and evaluate it.
@@ -100,7 +64,7 @@ def random_forest(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, 
         y_test: test labels
     """
     # Use sklearn to train a random forest model
-    classifier = RandomForestClassifier(n_estimators=80, random_state=seed)
+    classifier = RandomForestClassifier(n_estimators=50, random_state=seed, criterion='gini', max_features='sqrt')
     classifier.fit(X_train, y_train)
     # Evaluate the model
     y_pred = classifier.predict(X_test)
@@ -118,7 +82,43 @@ def svm(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np
         y_test: test labels
     """
     # Use sklearn to train a SVM model
-    classifier = SVC(kernel='sigmoid', random_state=seed)
+    classifier = SVC(kernel='rbf', random_state=seed, C=10, gamma='scale')
+    classifier.fit(X_train, y_train)
+    # Evaluate the model
+    y_pred = classifier.predict(X_test)
+    return y_test, y_pred
+
+
+def logistic_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Train a logistic regression model and evaluate it.
+
+    Args:
+        X_train: training set
+        X_test: test set
+        y_train: training labels
+        y_test: test labels
+    """
+    # Use sklearn to train a logistic regression model
+    classifier = LogisticRegression(random_state=seed, max_iter=1000, solver='liblinear', penalty='l1', C=5)
+    classifier.fit(X_train, y_train)
+    # Evaluate the model
+    y_pred = classifier.predict(X_test)
+    return y_test, y_pred
+
+
+def gaussian_naive_bayes(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Train a Gaussian Naive Bayes model and evaluate it.
+
+    Args:
+        X_train: training set
+        X_test: test set
+        y_train: training labels
+        y_test: test labels
+    """
+    # Use sklearn to train a Gaussian Naive Bayes model
+    classifier = GaussianNB(var_smoothing=1e-6)
     classifier.fit(X_train, y_train)
     # Evaluate the model
     y_pred = classifier.predict(X_test)
@@ -134,15 +134,16 @@ def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]
     # Load the dataset
     X_train, X_test, y_train, y_test = load_dataset(seed, use_angle)
 
+    # Dictionary to store the results
     predict = dict()
-    # Train the model using 4 different classifiers for imbalanced data
-    # 1. Random Forest
+    
+    # Random Forest
     predict["Random Forest"] = random_forest(X_train, X_test, y_train, y_test, seed)
-    # 2. SVM
+    # SVM
     predict["SVM"] = svm(X_train, X_test, y_train, y_test, seed)
-    # 3. Logistic Regression
+    # Logistic Regression
     predict["Logistic Regression"] = logistic_regression(X_train, X_test, y_train, y_test, seed)
-    # 4. Gaussian Naive Bayes
+    # Gaussian Naive Bayes
     predict["Gaussian Naive Bayes"] = gaussian_naive_bayes(X_train, X_test, y_train, y_test)
 
     return predict

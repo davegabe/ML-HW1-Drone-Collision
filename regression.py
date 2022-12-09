@@ -43,25 +43,6 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     return X_train, X_test, y_train, y_test
 
 
-def linear_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Train a linear regression model.
-
-    Args:
-        X_train: training set
-        X_test: test set
-        y_train: training labels
-        y_test: test labels
-    """
-    # Train the model
-    model = LogisticRegression(random_state=seed, max_iter=10000)
-    model.fit(X_train, y_train)
-
-    # Evaluate the model
-    y_pred = model.predict(X_test)
-    return y_test, y_pred
-
-
 def random_forest_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Train a random forest regression model.
@@ -73,7 +54,7 @@ def random_forest_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: n
         y_test: test labels
     """
     # Train the model
-    model = RandomForestRegressor(random_state=seed, n_estimators=100)
+    model = RandomForestRegressor(random_state=seed, n_estimators=40, criterion='friedman_mse', max_features='sqrt')
     model.fit(X_train, y_train)
 
     # Evaluate the model
@@ -92,7 +73,7 @@ def support_vector_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: 
         y_test: test labels
     """
     # Train the model
-    model = SVR(kernel='rbf', gamma='scale')
+    model = SVR(kernel='rbf', gamma='scale', C=7)
     model.fit(X_train, y_train)
 
     # Evaluate the model
@@ -109,13 +90,13 @@ def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]
     # Load the dataset
     X_train, X_test, y_train, y_test = load_dataset(seed, use_angle)
 
+    # Dictionary to store the predictions
     predict = dict()
-    # Train the model using 3 different algorithms
-    # # 1. Linear regression
-    # predict["Linear Regression"] = linear_regression(X_train, X_test, y_train, y_test, seed)
-    # 2. Random forest regression
+
+    # Random forest regression
     predict["Random Forest"] = random_forest_regression(X_train, X_test, y_train, y_test, seed)
-    # 3. Support vector regression
+    
+    # Support vector regression
     predict["Support Vector Regression"] = support_vector_regression(X_train, X_test, y_train, y_test, seed)
 
     return predict
