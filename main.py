@@ -125,5 +125,5 @@ def main_regression():
 
 
 if __name__ == '__main__':
-    # main_classification()
+    main_classification()
     main_regression()

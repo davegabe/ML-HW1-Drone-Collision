@@ -83,7 +83,7 @@ def main_regression():
         'Random Forest Regression': {
             'model': RandomForestRegressor(random_state=seed),
             'params': {
-                'n_estimators': [i*5 for i in range(1, 30)],
+                'n_estimators': [i*50 for i in range(1, 10)],
                 'criterion': ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'],
                 'max_features': [None, 'sqrt', 'log2']
             }
@@ -98,7 +98,7 @@ def main_regression():
         },
     }
     # Test GridSearchCV on each model
-    score = 'neg_mean_squared_error'
+    score = 'r2'
     for name, model in models.items():
         print("#"*25)
         print(f"Grid search on {name}")

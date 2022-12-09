@@ -54,7 +54,7 @@ def random_forest_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: n
         y_test: test labels
     """
     # Train the model
-    model = RandomForestRegressor(random_state=seed, n_estimators=40, criterion='friedman_mse', max_features='sqrt')
+    model = RandomForestRegressor(random_state=seed, n_estimators=300, criterion='poisson', max_features='sqrt')
     model.fit(X_train, y_train)
 
     # Evaluate the model
