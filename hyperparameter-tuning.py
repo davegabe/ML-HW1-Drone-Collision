@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
@@ -80,20 +80,22 @@ def main_regression():
     X_train, X_test, y_train, y_test = load_dataset(seed, use_angle)
     # Define the models and parameters to explore
     models = {
-        'Random Forest Regression': {
-            'model': RandomForestRegressor(random_state=seed),
-            'params': {
-                'n_estimators': [i*50 for i in range(1, 10)],
-                'criterion': ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'],
-                'max_features': [None, 'sqrt', 'log2']
-            }
-        },
-        'SVR': {
+        'Support Vector Regression': {
             'model': SVR(),
             'params': {
                 'C': [0.5 * i for i in range(1, 15)],
                 'kernel': ['rbf', 'linear', 'poly', 'sigmoid'],
                 'gamma': ['scale', 'auto']
+            }
+        },
+        'Gradient Boosting Regression': {
+            'model': GradientBoostingRegressor(random_state=seed),
+            'params': {
+                'n_estimators': [i*25 for i in range(1, 15)],
+                'learning_rate': [0.05 * i for i in range(1, 20)],
+                'loss': ['huber', 'quantile', 'squared_error', 'absolute_error'],
+                'max_depth': [i for i in range(1, 10)],
+                'max_features': [None, 'sqrt', 'log2']
             }
         },
     }

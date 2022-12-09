@@ -1,10 +1,8 @@
-from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVR
 from utils import normalize_data
 
@@ -27,12 +25,13 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     # Load the dataset
     dataset = pd.read_csv(file, sep='\t', header=0)
 
-    # Normalize the dataset
-    dataset = normalize_data(dataset.iloc[:, :])
-
     # Split the dataset into features and labels
     X = dataset.iloc[:, :-2]
     y = dataset.iloc[:, -1]
+
+    # Normalize the dataset
+    X = normalize_data(X)
+    y = (y - y.min()) / (y.max() - y.min())
 
     # Remove the columns "UAV_i_track" if not using angles
     if not use_angle:
@@ -41,25 +40,6 @@ def load_dataset(seed: int, use_angle: bool) -> tuple[np.ndarray, np.ndarray, np
     # Split the dataset into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
     return X_train, X_test, y_train, y_test
-
-
-def random_forest_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Train a random forest regression model.
-
-    Args:
-        X_train: training set
-        X_test: test set
-        y_train: training labels
-        y_test: test labels
-    """
-    # Train the model
-    model = RandomForestRegressor(random_state=seed, n_estimators=300, criterion='poisson', max_features='sqrt')
-    model.fit(X_train, y_train)
-
-    # Evaluate the model
-    y_pred = model.predict(X_test)
-    return y_test, y_pred
 
 
 def support_vector_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
@@ -80,6 +60,23 @@ def support_vector_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: 
     y_pred = model.predict(X_test)
     return y_test, y_pred
 
+def gradient_boosting_regression(X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, y_test: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Train a gradient boosting regression model.
+
+    Args:
+        X_train: training set
+        X_test: test set
+        y_train: training labels
+        y_test: test labels
+    """
+    # Train the model
+    model = GradientBoostingRegressor(n_estimators=300, learning_rate=0.1, max_depth=4, random_state=seed, loss='squared_error')
+    model.fit(X_train, y_train)
+
+    # Evaluate the model
+    y_pred = model.predict(X_test)
+    return y_test, y_pred
 
 def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """
@@ -92,12 +89,12 @@ def main(seed: int, use_angle: bool) -> dict[str, tuple[np.ndarray, np.ndarray]]
 
     # Dictionary to store the predictions
     predict = dict()
-
-    # Random forest regression
-    predict["Random Forest Regression"] = random_forest_regression(X_train, X_test, y_train, y_test, seed)
     
     # Support vector regression
     predict["Support Vector Regression"] = support_vector_regression(X_train, X_test, y_train, y_test, seed)
+
+    # Gradient Boosting regression
+    predict["Gradient Boosting Regression"] = gradient_boosting_regression(X_train, X_test, y_train, y_test, seed)
 
     return predict
 

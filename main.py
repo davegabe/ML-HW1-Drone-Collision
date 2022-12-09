@@ -143,8 +143,8 @@ def main_regression():
         plt.xlabel('Sample')
         plt.ylabel('Class')
         len_arr = len(y_test)
-        plt.scatter(range(len_arr), y_test, label='Real')
-        plt.scatter(range(len_arr), y_pred, label='Predicted')
+        plt.plot(range(len_arr), y_test, label='Real')
+        plt.plot(range(len_arr), y_pred, label='Predicted')
         plt.legend()
         filename = f'./results/prediction_{regressor.replace(" ", "_")}.png'
         plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0.01)
