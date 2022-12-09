@@ -7,3 +7,4 @@ settings.json
 /report/*.aux
 /report/*.log
 /report/*.synctex.gz
+/submission
